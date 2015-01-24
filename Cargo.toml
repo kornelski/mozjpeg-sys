@@ -1,0 +1,9 @@
+[package]
+name = "mozjpeg-sys"
+version = "0.0.1"
+authors = ["Kornel <pornel@pornel.net>"]
+build = "src/build.rs"
+links = "jpeg"
+
+[lib]
+name = "mozjpeg-sys"
