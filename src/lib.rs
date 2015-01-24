@@ -91,9 +91,9 @@ pub struct jpeg_component_info {
     pub dc_tbl_no: c_int,
     /// AC entropy table selector (0..3)
     pub ac_tbl_no: c_int,
+    pub width_in_blocks: JDIMENSION,
+    pub height_in_blocks: JDIMENSION,
     /// Remaining fields should be treated as private by applications.
-    width_in_blocks: JDIMENSION,
-    height_in_blocks: JDIMENSION,
     DCT_scaled_size: c_int,
     downsampled_width: JDIMENSION,
     downsampled_height: JDIMENSION,
