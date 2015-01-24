@@ -1,7 +1,12 @@
 [package]
 name = "mozjpeg-sys"
+description = "FFI bindings for statically built mozjpeg"
 version = "0.0.1"
 authors = ["Kornel <pornel@pornel.net>"]
+keywords = ["JPEG", "mozjpeg", "static"]
+repository = "https://github.com/pornel/mozjpeg-sys.git"
+homepage = "https://github.com/pornel/mozjpeg-sys"
+license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
 
