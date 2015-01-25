@@ -331,8 +331,8 @@ pub struct jpeg_compress_struct {
     /// should not be touched by a surrounding application.
     /// These fields are computed during compression startup
     progressive_mode: boolean,
-    max_h_samp_factor: c_int,
-    max_v_samp_factor: c_int,
+    pub max_h_samp_factor: c_int,
+    pub max_v_samp_factor: c_int,
     total_iMCU_rows: JDIMENSION,
     comps_in_scan: c_int,
     cur_comp_info: [*mut jpeg_component_info; 4us],
@@ -448,7 +448,7 @@ pub struct jpeg_decompress_struct {
     dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
     ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
     data_precision: c_int,
-    comp_info: *mut jpeg_component_info,
+    pub comp_info: *mut jpeg_component_info,
     progressive_mode: boolean,
     arith_code: boolean,
     arith_dc_L: [u8; 16us],
@@ -466,8 +466,8 @@ pub struct jpeg_decompress_struct {
     CCIR601_sampling: boolean,
     marker_list: *mut jpeg_marker_struct,
     /// These fields are computed during decompression startup
-    max_h_samp_factor: c_int,
-    max_v_samp_factor: c_int,
+    pub max_h_samp_factor: c_int,
+    pub max_v_samp_factor: c_int,
     min_DCT_scaled_size: c_int,
     total_iMCU_rows: JDIMENSION,
     sample_range_limit: *mut JSAMPLE,
