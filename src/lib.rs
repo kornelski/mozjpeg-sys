@@ -1,11 +1,8 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
-#![allow(missing_copy_implementations)]
-#![allow(raw_pointer_derive)]
-#![allow(dead_code)]
 
-#![allow(unstable)]
+#![feature(libc)]
 extern crate libc;
 
 pub use self::libc::{FILE, c_int, c_uint, c_float, size_t, c_double, c_void, fpos_t, c_char, c_uchar, c_long, c_ulong, c_short, c_ushort};
@@ -47,7 +44,6 @@ pub type JBLOCKROW = *mut JBLOCK;
 pub type JBLOCKARRAY = *mut JBLOCKROW;
 
 #[repr(C)]
-#[derive(Copy)]
 pub struct JQUANT_TBL {
     /// This array gives the coefficient quantizers in natural array order
     /// (not the zigzag order in which they are stored in a JPEG DQT marker).
@@ -60,7 +56,6 @@ impl Default for JQUANT_TBL {
 }
 
 #[repr(C)]
-#[derive(Copy)]
 pub struct JHUFF_TBL {
     pub bits: [u8; 17us],
     pub huffval: [u8; 256us],
@@ -112,7 +107,7 @@ impl Default for jpeg_component_info {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct jpeg_scan_info {
     pub comps_in_scan: c_int,
     pub component_index: [c_int; 4us],
@@ -135,7 +130,7 @@ pub struct jpeg_marker_struct {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum J_COLOR_SPACE {
     /// error/unspecified
     JCS_UNKNOWN,
@@ -182,7 +177,7 @@ pub enum J_COLOR_SPACE {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum J_DCT_METHOD {
     JDCT_ISLOW = 0,
     JDCT_IFAST = 1,
@@ -198,7 +193,7 @@ pub enum J_DITHER_MODE {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 /// These 32-bit GUIDs and the corresponding `jpeg_*_get_*_param()`
 /// `jpeg_*_set_*_param()` functions allow for extending the libjpeg API without
 /// breaking backward ABI compatibility.  The actual parameters are stored in
@@ -223,7 +218,7 @@ pub enum J_BOOLEAN_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum J_FLOAT_PARAM {
     JFLOAT_LAMBDA_LOG_SCALE1 = 0x5B61A599,
     JFLOAT_LAMBDA_LOG_SCALE2 = 0xB9BBAE03,
@@ -231,7 +226,7 @@ pub enum J_FLOAT_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum J_INT_PARAM {
   /// compression profile
   JINT_COMPRESS_PROFILE = 0xE9918625,
@@ -246,7 +241,7 @@ pub enum J_INT_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub enum JINT_COMPRESS_PROFILE_VALUE {
   JCP_MAX_COMPRESSION = 0x5D083AAD, /* best compression ratio (progressive, all mozjpeg extensions) */
   JCP_FASTEST = 0x2AEA5CB4 /* libjpeg[-turbo] defaults (baseline, no mozjpeg extensions) */
@@ -570,7 +565,6 @@ pub enum jvirt_sarray_control {}
 pub enum jvirt_barray_control {}
 
 #[repr(C)]
-#[derive(Copy)]
 pub struct jpeg_memory_mgr {
     pub alloc_small: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                 pool_id: c_int,
