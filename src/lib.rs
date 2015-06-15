@@ -2,7 +2,6 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
-#![feature(libc)]
 extern crate libc;
 
 pub use self::libc::{FILE, c_int, c_uint, c_float, size_t, c_double, c_void, fpos_t, c_char, c_uchar, c_long, c_ulong, c_short, c_ushort};
@@ -38,7 +37,7 @@ pub type JSAMPARRAY_MUT = *mut JSAMPROW_MUT;
 pub type JSAMPIMAGE = *const JSAMPARRAY;
 pub type JSAMPIMAGE_MUT = *mut JSAMPARRAY_MUT;
 /// one block of coefficients
-pub type JBLOCK = [JCOEF; 64us];
+pub type JBLOCK = [JCOEF; 64usize];
 /// pointer to one row of coefficient blocks
 pub type JBLOCKROW = *mut JBLOCK;
 pub type JBLOCKARRAY = *mut JBLOCKROW;
@@ -48,7 +47,7 @@ pub struct JQUANT_TBL {
     /// This array gives the coefficient quantizers in natural array order
     /// (not the zigzag order in which they are stored in a JPEG DQT marker).
     /// CAUTION: IJG versions prior to v6a kept this array in zigzag order.
-    pub quantval: [u16; 64us],
+    pub quantval: [u16; 64usize],
     sent_table: boolean,
 }
 impl Default for JQUANT_TBL {
@@ -57,8 +56,8 @@ impl Default for JQUANT_TBL {
 
 #[repr(C)]
 pub struct JHUFF_TBL {
-    pub bits: [u8; 17us],
-    pub huffval: [u8; 256us],
+    pub bits: [u8; 17usize],
+    pub huffval: [u8; 256usize],
     sent_table: boolean,
 }
 impl Default for JHUFF_TBL {
@@ -110,7 +109,7 @@ impl Default for jpeg_component_info {
 #[derive(Copy, Clone)]
 pub struct jpeg_scan_info {
     pub comps_in_scan: c_int,
-    pub component_index: [c_int; 4us],
+    pub component_index: [c_int; 4usize],
     pub Ss: c_int,
     pub Se: c_int,
     pub Ah: c_int,
@@ -185,7 +184,7 @@ pub enum J_DCT_METHOD {
 }
 
 #[repr(C)]
-#[deprecated]
+// #[deprecated]
 pub enum J_DITHER_MODE {
     JDITHER_NONE = 0,
     JDITHER_ORDERED = 1,
@@ -293,14 +292,14 @@ pub struct jpeg_compress_struct {
     pub jpeg_color_space: J_COLOR_SPACE,
     /// comp_info[i] describes component that appears i'th in SOF
     pub comp_info: *mut jpeg_component_info,
-    pub quant_tbl_ptrs: [*mut JQUANT_TBL; 4us],
+    pub quant_tbl_ptrs: [*mut JQUANT_TBL; 4usize],
     /// ptrs to coefficient quantization tables, or NULL if not defined,
     /// and corresponding scale factors (percentage, initialized 100).
-    pub dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
-    pub ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
-    pub arith_dc_L: [u8; 16us],
-    pub arith_dc_U: [u8; 16us],
-    pub arith_ac_K: [u8; 16us],
+    pub dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
+    pub ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
+    pub arith_dc_L: [u8; 16usize],
+    pub arith_dc_U: [u8; 16usize],
+    pub arith_ac_K: [u8; 16usize],
     pub num_scans: c_int,
     pub scan_info: *const jpeg_scan_info,
     /// TRUE=caller supplies downsampled data
@@ -330,11 +329,11 @@ pub struct jpeg_compress_struct {
     pub max_v_samp_factor: c_int,
     total_iMCU_rows: JDIMENSION,
     comps_in_scan: c_int,
-    cur_comp_info: [*mut jpeg_component_info; 4us],
+    cur_comp_info: [*mut jpeg_component_info; 4usize],
     MCUs_per_row: JDIMENSION,
     MCU_rows_in_scan: JDIMENSION,
     blocks_in_MCU: c_int,
-    MCU_membership: [c_int; 10us],
+    MCU_membership: [c_int; 10usize],
     Ss: c_int,
     Se: c_int,
     Ah: c_int,
@@ -388,19 +387,19 @@ pub struct jpeg_decompress_struct {
     pub dct_method: J_DCT_METHOD,
     pub do_fancy_upsampling: boolean,
     pub do_block_smoothing: boolean,
-    #[deprecated]
+    // #[deprecated]
     pub quantize_colors: boolean,
-    #[deprecated]
+    // #[deprecated]
     pub dither_mode: J_DITHER_MODE,
-    #[deprecated]
+    // #[deprecated]
     pub two_pass_quantize: boolean,
-    #[deprecated]
+    // #[deprecated]
     pub desired_number_of_colors: c_int,
-    #[deprecated]
+    // #[deprecated]
     pub enable_1pass_quant: boolean,
-    #[deprecated]
+    // #[deprecated]
     pub enable_external_quant: boolean,
-    #[deprecated]
+    // #[deprecated]
     pub enable_2pass_quant: boolean,
     /// Description of actual output image that will be returned to application.
     /// These fields are computed by jpeg_start_decompress().
@@ -415,9 +414,9 @@ pub struct jpeg_decompress_struct {
     /// high, space and time will be wasted due to unnecessary data copying.
     /// Usually rec_outbuf_height will be 1 or 2, at most 4.
     pub rec_outbuf_height: c_int,
-    #[deprecated]
+    // #[deprecated]
     pub actual_number_of_colors: c_int,
-    #[deprecated]
+    // #[deprecated]
     pub colormap: JSAMPARRAY_MUT,
     /// Row index of next scanline to be read from jpeg_read_scanlines().
     /// Application may use this to control its processing loop, e.g.,
@@ -439,16 +438,16 @@ pub struct jpeg_decompress_struct {
     /// Internal JPEG parameters --- the application usually need not look at
     /// these fields.  Note that the decompressor output side may not use
     /// any parameters that can change between scans.
-    quant_tbl_ptrs: [*mut JQUANT_TBL; 4us],
-    dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
-    ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4us],
+    quant_tbl_ptrs: [*mut JQUANT_TBL; 4usize],
+    dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
+    ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
     data_precision: c_int,
     pub comp_info: *mut jpeg_component_info,
     progressive_mode: boolean,
     arith_code: boolean,
-    arith_dc_L: [u8; 16us],
-    arith_dc_U: [u8; 16us],
-    arith_ac_K: [u8; 16us],
+    arith_dc_L: [u8; 16usize],
+    arith_dc_U: [u8; 16usize],
+    arith_ac_K: [u8; 16usize],
     restart_interval: c_uint,
     saw_JFIF_marker: boolean,
     JFIF_major_version: u8,
@@ -467,11 +466,11 @@ pub struct jpeg_decompress_struct {
     total_iMCU_rows: JDIMENSION,
     sample_range_limit: *mut JSAMPLE,
     comps_in_scan: c_int,
-    cur_comp_info: [*mut jpeg_component_info; 4us],
+    cur_comp_info: [*mut jpeg_component_info; 4usize],
     MCUs_per_row: JDIMENSION,
     MCU_rows_in_scan: JDIMENSION,
     blocks_in_MCU: c_int,
-    MCU_membership: [c_int; 10us],
+    MCU_membership: [c_int; 10usize],
     Ss: c_int,
     Se: c_int,
     Ah: c_int,
@@ -497,7 +496,7 @@ pub struct jpeg_error_mgr {
     pub error_exit: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub emit_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, msg_level: c_int)>,
     pub output_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
-    pub format_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[c_uchar; 80us])>,
+    pub format_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[c_uchar; 80usize])>,
     pub reset_error_mgr: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub msg_code: c_int,
     pub msg_parm: msg_parm_union,
@@ -512,13 +511,13 @@ pub struct jpeg_error_mgr {
 
 #[repr(C)]
 pub struct msg_parm_union {
-    pub _bindgen_data_: [u32; 20us],
+    pub _bindgen_data_: [u32; 20usize],
 }
 impl msg_parm_union {
-    pub unsafe fn i(&mut self) -> *mut [c_int; 8us] {
+    pub unsafe fn i(&mut self) -> *mut [c_int; 8usize] {
         ::std::mem::transmute(&self._bindgen_data_)
     }
-    pub unsafe fn s(&mut self) -> *mut [c_char; 80us] {
+    pub unsafe fn s(&mut self) -> *mut [c_char; 80usize] {
         ::std::mem::transmute(&self._bindgen_data_)
     }
 }
@@ -672,7 +671,7 @@ extern "C" {
     pub fn jpeg_start_output(cinfo: &mut jpeg_decompress_struct, scan_number: c_int) -> boolean;
     pub fn jpeg_finish_output(cinfo: &mut jpeg_decompress_struct) -> boolean;
     pub fn jpeg_input_complete(cinfo: &jpeg_decompress_struct) -> boolean;
-    #[deprecated]
+    // #[deprecated]
     pub fn jpeg_new_colormap(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_consume_input(cinfo: &mut jpeg_decompress_struct) -> c_int;
     pub fn jpeg_calc_output_dimensions(cinfo: &mut jpeg_decompress_struct);
