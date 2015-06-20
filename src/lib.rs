@@ -129,7 +129,7 @@ pub struct jpeg_marker_struct {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_COLOR_SPACE {
     /// error/unspecified
     JCS_UNKNOWN,
@@ -176,7 +176,7 @@ pub enum J_COLOR_SPACE {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_DCT_METHOD {
     JDCT_ISLOW = 0,
     JDCT_IFAST = 1,
@@ -192,7 +192,7 @@ pub enum J_DITHER_MODE {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 /// These 32-bit GUIDs and the corresponding `jpeg_*_get_*_param()`
 /// `jpeg_*_set_*_param()` functions allow for extending the libjpeg API without
 /// breaking backward ABI compatibility.  The actual parameters are stored in
@@ -217,7 +217,7 @@ pub enum J_BOOLEAN_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_FLOAT_PARAM {
     JFLOAT_LAMBDA_LOG_SCALE1 = 0x5B61A599,
     JFLOAT_LAMBDA_LOG_SCALE2 = 0xB9BBAE03,
@@ -225,7 +225,7 @@ pub enum J_FLOAT_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_INT_PARAM {
   /// compression profile
   JINT_COMPRESS_PROFILE = 0xE9918625,
@@ -240,7 +240,7 @@ pub enum J_INT_PARAM {
 }
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum JINT_COMPRESS_PROFILE_VALUE {
   JCP_MAX_COMPRESSION = 0x5D083AAD, /* best compression ratio (progressive, all mozjpeg extensions) */
   JCP_FASTEST = 0x2AEA5CB4 /* libjpeg[-turbo] defaults (baseline, no mozjpeg extensions) */
