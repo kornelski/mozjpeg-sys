@@ -128,6 +128,11 @@ pub struct jpeg_marker_struct {
     pub data: *mut u8,
 }
 
+pub enum jpeg_marker {
+    APP0  = 0xE0,    /* APP0 marker code */
+    COM  = 0xFE,    /* COM marker code */
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_COLOR_SPACE {
