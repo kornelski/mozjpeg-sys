@@ -9,6 +9,8 @@ license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
 version = "0.3.0"
+include = ["src/**/*", "Cargo.toml", "README.md", "Makefile"]
+
 [dependencies]
 libc = "0.2.12"
 
