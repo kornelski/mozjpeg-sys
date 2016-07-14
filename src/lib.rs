@@ -463,7 +463,7 @@ pub struct jpeg_decompress_struct {
     saw_Adobe_marker: boolean,
     Adobe_transform: u8,
     CCIR601_sampling: boolean,
-    marker_list: *mut jpeg_marker_struct,
+    pub marker_list: *mut jpeg_marker_struct,
     /// These fields are computed during decompression startup
     pub max_h_samp_factor: c_int,
     pub max_v_samp_factor: c_int,
