@@ -1,8 +1,8 @@
-#Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](http://www.rust-lang.org/)
+# Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](http://www.rust-lang.org/)
 
 See [crates.io](https://crates.io/crates/mozjpeg-sys).
 
-This crate uses libjpeg API, so libjpeg usage manual applies. You'll most likely want to wrap it in a higher-level API :)
+This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in a higher-level API :)
 
 ```rust
 let JPOOL_IMAGE:mozjpeg_sys::c_int = 1;
