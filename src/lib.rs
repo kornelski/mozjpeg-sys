@@ -281,7 +281,7 @@ enum jpeg_entropy_encoder {}
 #[repr(C)]
 pub struct jpeg_compress_struct {
     pub common : jpeg_common_struct,
-    dest: *mut jpeg_destination_mgr,
+    pub dest: *mut jpeg_destination_mgr,
     /// Description of source image --- these fields must be filled in by
     /// outer application before starting compression.
     pub image_width: JDIMENSION,
