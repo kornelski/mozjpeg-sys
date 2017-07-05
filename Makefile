@@ -1,5 +1,5 @@
 OUT_DIR?=/tmp
-MOZDIR=$(OUT_DIR)/mozjpeg
+MOZDIR=vendor
 CFLAGS?=-O3 -fPIC -mtune=native -march=native
 CONFIGOPTIONS=--host="$(HOST)" --build="$(TARGET)" --enable-static --disable-shared --without-arith-enc --without-arith-dec --without-java --without-turbojpeg CFLAGS="$(CFLAGS)"
 
@@ -16,7 +16,7 @@ $(MOZDIR)/configure: $(MOZDIR)/configure.ac
 	( cd $(MOZDIR) && autoreconf -i ) && touch "$@"
 
 $(MOZDIR)/configure.ac:
-	git clone --depth=1 https://github.com/mozilla/mozjpeg.git "$(MOZDIR)"
+	git submodule update
 
 clean:
 	-rm -rf $(MOZDIR)

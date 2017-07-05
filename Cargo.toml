@@ -8,8 +8,8 @@ homepage = "https://github.com/pornel/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.3.3"
-include = ["src/**/*", "Cargo.toml", "README.md", "Makefile"]
+version = "0.4.0"
+include = ["src/**/*", "vendor/**/*", "Cargo.toml", "README.md", "Makefile"]
 
 [dependencies]
 libc = "0.2.12"

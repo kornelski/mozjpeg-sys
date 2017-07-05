@@ -4,6 +4,15 @@ See [crates.io](https://crates.io/crates/mozjpeg-sys).
 
 This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in a higher-level API :)
 
+## Requirements
+
+* nasm
+* libtool
+* autotools
+* build-essentials (gcc, etc.)
+
+## Example
+
 ```rust
 let JPOOL_IMAGE:mozjpeg_sys::c_int = 1;
 
