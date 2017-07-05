@@ -706,6 +706,14 @@ extern "C" {
     pub fn jpeg_c_int_param_supported(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> boolean;
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
+    #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
+}
+
+#[test]
+pub fn simd_is_linked_properly() {
+    unsafe {
+        jsimd_can_rgb_ycc();
+    }
 }
 
 #[test]
