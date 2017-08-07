@@ -618,7 +618,7 @@ pub struct jpeg_memory_mgr {
 pub type jpeg_marker_parser_method = Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct) -> boolean>;
 
 extern "C" {
-    pub fn jpeg_std_error(err: &mut jpeg_error_mgr) -> &mut jpeg_error_mgr;
+    pub fn jpeg_std_error<'a>(err: &'a mut jpeg_error_mgr) -> &'a mut jpeg_error_mgr;
     pub fn jpeg_CreateCompress(cinfo: &mut jpeg_compress_struct, version: c_int, structsize: size_t);
     pub fn jpeg_CreateDecompress(cinfo: &mut jpeg_decompress_struct, version: c_int, structsize: size_t);
     pub fn jpeg_destroy_compress(cinfo: &mut jpeg_compress_struct);
