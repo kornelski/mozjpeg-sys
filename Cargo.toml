@@ -1,14 +1,16 @@
 [package]
 name = "mozjpeg-sys"
 description = "FFI bindings for MozJPEG v3.3.1.\n\nMozJPEG is automatically built and linked statically. Requires nasm, C compiler and make."
+categories = [ "external-ffi-bindings", "multimedia::images" ]
 authors = ["Kornel <pornel@pornel.net>"]
 keywords = ["JPEG", "mozjpeg", "libjpeg", "static"]
+readme = "README.md"
 repository = "https://github.com/pornel/mozjpeg-sys.git"
 homepage = "https://github.com/pornel/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.4.2"
+version = "0.4.3"
 include = ["src/**/*", "vendor/**/*", "Cargo.toml", "README.md", "Makefile"]
 
 [dependencies]

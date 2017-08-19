@@ -4,10 +4,10 @@
 
 extern crate libc;
 
-pub use self::libc::{FILE, c_int, c_uint, c_float, size_t, c_double, c_void, fpos_t, c_char, c_uchar, c_long, c_ulong, c_short, c_ushort};
-use ::std::mem;
-use ::std::option::Option;
-use ::std::default::Default;
+pub use self::libc::FILE;
+pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
+use std::mem;
+use std::default::Default;
 
 pub use J_COLOR_SPACE::*;
 pub use J_BOOLEAN_PARAM::*;
@@ -25,7 +25,7 @@ pub const DCTSIZE2: usize = DCTSIZE*DCTSIZE;
 
 pub type boolean = c_int;
 pub type JSAMPLE = u8;
-pub type JCOEF = c_short;
+pub type JCOEF = i16;
 pub type JDIMENSION = c_uint;
 /// ptr to one image row of pixel samples.
 pub type JSAMPROW = *const JSAMPLE;
@@ -290,7 +290,7 @@ pub struct jpeg_compress_struct {
     /// `in_color_space` must be correct before you can even call `jpeg_set_defaults()`.
     pub in_color_space: J_COLOR_SPACE,
     /// image gamma of input image
-    pub input_gamma: c_double,
+    pub input_gamma: f64,
     /// bits of precision in image data
     pub data_precision: c_int,
     pub num_components: c_int,
@@ -385,7 +385,7 @@ pub struct jpeg_decompress_struct {
     pub scale_num: c_uint,
     pub scale_denom: c_uint,
     /// image gamma wanted in output
-    pub output_gamma: c_double,
+    pub output_gamma: f64,
     pub buffered_image: boolean,
     /// TRUE=downsampled data wanted
     pub raw_data_out: boolean,
@@ -501,15 +501,15 @@ pub struct jpeg_error_mgr {
     pub error_exit: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub emit_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, msg_level: c_int)>,
     pub output_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
-    pub format_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[c_uchar; 80usize])>,
+    pub format_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[u8; 80usize])>,
     pub reset_error_mgr: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub msg_code: c_int,
     pub msg_parm: msg_parm_union,
     pub trace_level: c_int,
     pub num_warnings: c_long,
-    pub jpeg_message_table: *const *const c_char,
+    pub jpeg_message_table: *const *const i8,
     pub last_jpeg_message: c_int,
-    pub addon_message_table: *const *const c_char,
+    pub addon_message_table: *const *const i8,
     pub first_addon_message: c_int,
     pub last_addon_message: c_int,
 }
@@ -522,7 +522,7 @@ impl msg_parm_union {
     pub unsafe fn i(&mut self) -> *mut [c_int; 8usize] {
         ::std::mem::transmute(&self._bindgen_data_)
     }
-    pub unsafe fn s(&mut self) -> *mut [c_char; 80usize] {
+    pub unsafe fn s(&mut self) -> *mut [i8; 80usize] {
         ::std::mem::transmute(&self._bindgen_data_)
     }
 }
@@ -542,7 +542,7 @@ pub struct jpeg_progress_mgr {
 #[repr(C)]
 pub struct jpeg_destination_mgr {
     pub next_output_byte: *mut u8,
-    pub free_in_buffer: size_t,
+    pub free_in_buffer: usize,
     pub init_destination: Option<extern "C" fn(cinfo: &mut jpeg_compress_struct)>,
     pub empty_output_buffer: Option<extern "C" fn(cinfo: &mut jpeg_compress_struct)
                                                        -> boolean>,
@@ -552,7 +552,7 @@ pub struct jpeg_destination_mgr {
 #[repr(C)]
 pub struct jpeg_source_mgr {
     pub next_input_byte: *const u8,
-    pub bytes_in_buffer: size_t,
+    pub bytes_in_buffer: usize,
     pub init_source: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
     pub fill_input_buffer: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct)
                                                      -> boolean>,
@@ -572,10 +572,10 @@ pub enum jvirt_barray_control {}
 pub struct jpeg_memory_mgr {
     pub alloc_small: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                 pool_id: c_int,
-                                                sizeofobject: size_t) -> *mut c_void>,
+                                                sizeofobject: usize) -> *mut c_void>,
     pub alloc_large: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                 pool_id: c_int,
-                                                sizeofobject: size_t) -> *mut c_void>,
+                                                sizeofobject: usize) -> *mut c_void>,
     pub alloc_sarray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                  pool_id: c_int,
                                                  samplesperrow: JDIMENSION,
@@ -619,17 +619,17 @@ pub type jpeg_marker_parser_method = Option<extern "C" fn(cinfo: &mut jpeg_decom
 
 extern "C" {
     pub fn jpeg_std_error<'a>(err: &'a mut jpeg_error_mgr) -> &'a mut jpeg_error_mgr;
-    pub fn jpeg_CreateCompress(cinfo: &mut jpeg_compress_struct, version: c_int, structsize: size_t);
-    pub fn jpeg_CreateDecompress(cinfo: &mut jpeg_decompress_struct, version: c_int, structsize: size_t);
+    pub fn jpeg_CreateCompress(cinfo: &mut jpeg_compress_struct, version: c_int, structsize: usize);
+    pub fn jpeg_CreateDecompress(cinfo: &mut jpeg_decompress_struct, version: c_int, structsize: usize);
     pub fn jpeg_destroy_compress(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_destroy_decompress(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_stdio_dest(cinfo: &mut jpeg_compress_struct, outfile: *mut FILE);
     pub fn jpeg_stdio_src(cinfo: &mut jpeg_decompress_struct, infile: *mut FILE);
     pub fn jpeg_mem_dest(cinfo: &mut jpeg_compress_struct,
-                     outbuffer: *mut *mut c_uchar,
+                     outbuffer: *mut *mut u8,
                      outsize: *mut c_ulong);
     pub fn jpeg_mem_src(cinfo: &mut jpeg_decompress_struct,
-                    inbuffer: *const c_uchar,
+                    inbuffer: *const u8,
                     insize: c_ulong);
     pub fn jpeg_set_defaults(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_set_colorspace(cinfo: &mut jpeg_compress_struct, colorspace: J_COLOR_SPACE);
@@ -646,10 +646,10 @@ extern "C" {
     pub fn jpeg_float_add_quant_table(cinfo: &mut jpeg_compress_struct,
                                   which_tbl: c_int,
                                   basic_table: *const c_uint,
-                                  scale_factor: c_float,
+                                  scale_factor: f32,
                                   force_baseline: boolean);
     pub fn jpeg_quality_scaling(quality: c_int) -> c_int;
-    pub fn jpeg_float_quality_scaling(quality: c_float) -> c_float;
+    pub fn jpeg_float_quality_scaling(quality: f32) -> f32;
     pub fn jpeg_simple_progression(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_suppress_tables(cinfo: &mut jpeg_compress_struct, suppress: boolean);
     pub fn jpeg_alloc_quant_table(cinfo: &mut jpeg_common_struct) -> *mut JQUANT_TBL;
@@ -701,8 +701,8 @@ extern "C" {
     pub fn jpeg_c_get_bool_param(cinfo: &jpeg_compress_struct,
                              param: J_BOOLEAN_PARAM) -> boolean;
     pub fn jpeg_c_float_param_supported(cinfo: &jpeg_compress_struct, param: J_FLOAT_PARAM) -> boolean;
-    pub fn jpeg_c_set_float_param(cinfo: &mut jpeg_compress_struct, param: J_FLOAT_PARAM, value: c_float);
-    pub fn jpeg_c_get_float_param(cinfo: &jpeg_compress_struct, param: J_FLOAT_PARAM) -> c_float;
+    pub fn jpeg_c_set_float_param(cinfo: &mut jpeg_compress_struct, param: J_FLOAT_PARAM, value: f32);
+    pub fn jpeg_c_get_float_param(cinfo: &jpeg_compress_struct, param: J_FLOAT_PARAM) -> f32;
     pub fn jpeg_c_int_param_supported(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> boolean;
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
@@ -722,7 +722,7 @@ pub fn try_decompress() {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
         let mut cinfo: jpeg_decompress_struct = mem::zeroed();
-        let size = mem::size_of_val(&cinfo) as size_t;
+        let size = mem::size_of_val(&cinfo) as usize;
         cinfo.common.err = &mut err;
         jpeg_CreateDecompress(&mut cinfo, JPEG_LIB_VERSION, size);
         jpeg_destroy_decompress(&mut cinfo);
@@ -735,7 +735,7 @@ pub fn try_compress() {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
         let mut cinfo: jpeg_compress_struct = mem::zeroed();
-        let size = mem::size_of_val(&cinfo) as size_t;
+        let size = mem::size_of_val(&cinfo) as usize;
         cinfo.common.err = &mut err;
         if 0 == jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_TRELLIS_QUANT) {
             panic!("Not linked to mozjpeg?");
