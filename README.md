@@ -7,8 +7,6 @@ This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github
 ## Requirements
 
 * nasm
-* libtool
-* make
 * build-essentials (gcc, etc.)
 
 ## Example

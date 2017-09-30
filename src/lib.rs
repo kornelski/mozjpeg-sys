@@ -42,6 +42,14 @@ pub type JBLOCK = [JCOEF; 64usize];
 pub type JBLOCKROW = *mut JBLOCK;
 pub type JBLOCKARRAY = *mut JBLOCKROW;
 
+// must match dct.h; assumes bits in sample == 8
+/// type for individual integer DCT coefficient
+#[cfg(feature = "nasm_simd")]
+pub type DCTELEM = i16;
+#[cfg(not(feature = "nasm_simd"))]
+pub type DCTELEM = c_int;
+
+
 #[repr(C)]
 pub struct JQUANT_TBL {
     /// This array gives the coefficient quantizers in natural array order
@@ -707,12 +715,23 @@ extern "C" {
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
     #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
+    #[cfg(test)] fn jsimd_can_fdct_ifast() -> c_int;
+    #[cfg(test)] fn jsimd_fdct_ifast_sse2(block: *mut DCTELEM);
 }
 
 #[test]
-pub fn simd_is_linked_properly() {
+pub fn simd_is_detectable() {
     unsafe {
         jsimd_can_rgb_ycc();
+    }
+}
+
+#[test]
+#[cfg(all(target_arch="x86_64", feature="nasm_simd"))]
+pub fn simd_works_sse2() {
+    unsafe {
+        assert!(jsimd_can_fdct_ifast() != 0);
+        jsimd_fdct_ifast_sse2([0 as DCTELEM; 64].as_mut_ptr());
     }
 }
 
