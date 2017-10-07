@@ -92,6 +92,10 @@ fn build_nasm() {
         flags.push("-g");
     }
 
+    if cfg!(target_os = "linux") {
+        flags.push("-DELF");
+    }
+
     let x86_64 = [
         "vendor/simd/jfdctflt-sse-64.asm", "vendor/simd/jccolor-sse2-64.asm", "vendor/simd/jcgray-sse2-64.asm",
         "vendor/simd/jchuff-sse2-64.asm", "vendor/simd/jcsample-sse2-64.asm", "vendor/simd/jdcolor-sse2-64.asm",
