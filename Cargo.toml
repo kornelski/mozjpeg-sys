@@ -23,6 +23,10 @@ version = "1.0.3"
 optional = true
 version = "0.0.7"
 
+[[example]]
+name = "reencode"
+path = "examples/reencode.rs"
+
 [dependencies]
 libc = "0.2.31"
 
