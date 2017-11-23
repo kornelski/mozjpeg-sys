@@ -23,6 +23,11 @@ pub const DCTSIZE: usize = 8;
 /// DCTSIZE²
 pub const DCTSIZE2: usize = DCTSIZE*DCTSIZE;
 
+/// lasts until master record is destroyed
+pub const JPOOL_PERMANENT: c_int = 0;
+/// lasts until done with image/datastream
+pub const JPOOL_IMAGE: c_int     = 1;
+
 pub type boolean = c_int;
 pub type JSAMPLE = u8;
 pub type JCOEF = i16;
@@ -106,7 +111,7 @@ pub struct jpeg_component_info {
     MCU_sample_width: c_int,
     last_col_width: c_int,
     last_row_height: c_int,
-    quant_table: *mut JQUANT_TBL,
+    pub quant_table: *mut JQUANT_TBL,
     dct_table: *mut c_void,
 }
 impl Default for jpeg_component_info {
@@ -451,7 +456,7 @@ pub struct jpeg_decompress_struct {
     /// Internal JPEG parameters --- the application usually need not look at
     /// these fields.  Note that the decompressor output side may not use
     /// any parameters that can change between scans.
-    quant_tbl_ptrs: [*mut JQUANT_TBL; 4usize],
+    pub quant_tbl_ptrs: [*mut JQUANT_TBL; 4usize],
     dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
     ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
     data_precision: c_int,
@@ -625,10 +630,18 @@ pub struct jpeg_memory_mgr {
 
 pub type jpeg_marker_parser_method = Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct) -> boolean>;
 
+pub unsafe fn jpeg_create_decompress(dinfo: *mut jpeg_decompress_struct) {
+    jpeg_CreateDecompress(dinfo, JPEG_LIB_VERSION, mem::size_of::<jpeg_decompress_struct>());
+}
+
+pub unsafe fn jpeg_create_compress(cinfo: *mut jpeg_compress_struct) {
+    jpeg_CreateCompress(cinfo, JPEG_LIB_VERSION, mem::size_of::<jpeg_compress_struct>());
+}
+
 extern "C" {
     pub fn jpeg_std_error<'a>(err: &'a mut jpeg_error_mgr) -> &'a mut jpeg_error_mgr;
-    pub fn jpeg_CreateCompress(cinfo: &mut jpeg_compress_struct, version: c_int, structsize: usize);
-    pub fn jpeg_CreateDecompress(cinfo: &mut jpeg_decompress_struct, version: c_int, structsize: usize);
+    pub fn jpeg_CreateCompress(cinfo: *mut jpeg_compress_struct, version: c_int, structsize: usize);
+    pub fn jpeg_CreateDecompress(cinfo: *mut jpeg_decompress_struct, version: c_int, structsize: usize);
     pub fn jpeg_destroy_compress(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_destroy_decompress(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_stdio_dest(cinfo: &mut jpeg_compress_struct, outfile: *mut FILE);
@@ -746,9 +759,8 @@ pub fn try_decompress() {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
         let mut cinfo: jpeg_decompress_struct = mem::zeroed();
-        let size = mem::size_of_val(&cinfo) as usize;
         cinfo.common.err = &mut err;
-        jpeg_CreateDecompress(&mut cinfo, JPEG_LIB_VERSION, size);
+        jpeg_create_decompress(&mut cinfo);
         jpeg_destroy_decompress(&mut cinfo);
     }
 }
