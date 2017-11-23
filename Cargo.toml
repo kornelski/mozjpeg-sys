@@ -11,13 +11,13 @@ homepage = "https://github.com/pornel/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.5.1"
+version = "0.5.2"
 
 [build-dependencies]
 
 [build-dependencies.cc]
 features = ["parallel"]
-version = "1.0.0"
+version = "1.0.3"
 
 [build-dependencies.nasm-rs]
 optional = true
@@ -35,3 +35,4 @@ turbojpeg_api = []
 
 [lib]
 name = "mozjpeg_sys"
+crate-type = ["staticlib", "cdylib", "lib"]
