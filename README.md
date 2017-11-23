@@ -1,15 +1,23 @@
-# Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](http://www.rust-lang.org/)
+# Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](https://www.rust-lang.org/)
 
 See [crates.io](https://crates.io/crates/mozjpeg-sys).
 
 This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in a higher-level API :)
+
+Many fields in structs are marked as private by default, but if you need to access them, make a pull request marking them `pub`.
 
 ## Requirements
 
 * nasm
 * build-essentials (gcc, etc.)
 
-## [Example](examples/reencode.rs)
+## Usage
+
+In Rust add "mozjpeg-sys" as a dependency and use with `extern crate mozjpeg_sys`.
+
+For non-Rust projects you can build the library using `cargo build --release`. It creates `target/release/libmozjpeg_sys.a` and `target/release/libmozjpeg_sys.{dll,so,dylib}`, which can be linked with C and other languages.
+
+### [Example](examples/reencode.rs)
 
 ```rust
 let mut err: jpeg_error_mgr = mem::zeroed();
