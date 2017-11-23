@@ -204,7 +204,7 @@ pub enum J_DITHER_MODE {
     JDITHER_FS = 2,
 }
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 /// These 32-bit GUIDs and the corresponding `jpeg_*_get_*_param()`
 /// `jpeg_*_set_*_param()` functions allow for extending the libjpeg API without
@@ -229,7 +229,7 @@ pub enum J_BOOLEAN_PARAM {
     JBOOLEAN_OVERSHOOT_DERINGING = 0x3F4BBBF9,
 }
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_FLOAT_PARAM {
     JFLOAT_LAMBDA_LOG_SCALE1 = 0x5B61A599,
@@ -237,7 +237,7 @@ pub enum J_FLOAT_PARAM {
     JFLOAT_TRELLIS_DELTA_DC_WEIGHT = 0x13775453
 }
 
-#[repr(C)]
+#[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_INT_PARAM {
   /// compression profile
@@ -715,8 +715,13 @@ extern "C" {
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
     #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
-    #[cfg(test)] fn jsimd_can_fdct_ifast() -> c_int;
-    #[cfg(test)] fn jsimd_fdct_ifast_sse2(block: *mut DCTELEM);
+    #[cfg(test)] #[allow(dead_code)] fn jsimd_can_fdct_ifast() -> c_int;
+    #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast_sse2(block: *mut DCTELEM);
+}
+
+#[test]
+pub fn enum_32bit() {
+    assert_eq!(JBOOLEAN_TRELLIS_QUANT as u64, 0xC5122033);
 }
 
 #[test]
