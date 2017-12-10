@@ -11,7 +11,7 @@ homepage = "https://github.com/pornel/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.5.2"
+version = "0.5.3"
 
 [build-dependencies]
 
@@ -21,7 +21,7 @@ version = "1.0.3"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.0.7"
+version = "0.1.0"
 
 [[example]]
 name = "reencode"
@@ -34,7 +34,7 @@ libc = "0.2.31"
 arith_dec = []
 arith_enc = []
 default = ["nasm_simd"]
-nasm_simd = ["nasm-rs"]
+nasm_simd = ["nasm-rs", "nasm-rs/parallel"]
 turbojpeg_api = []
 
 [lib]
