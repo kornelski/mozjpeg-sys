@@ -13,6 +13,9 @@ build = "src/build.rs"
 links = "jpeg"
 version = "0.5.5"
 
+[badges]
+travis-ci = { repository = "pornel/mozjpeg-sys" }
+
 [build-dependencies]
 dunce = "0.1.1"
 
