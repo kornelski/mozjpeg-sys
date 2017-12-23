@@ -1,0 +1,13 @@
+language: rust
+script:
+  - cargo test --verbose --all
+  - cargo test --verbose --all --features=jpeg70_abi
+  - cargo test --verbose --all --features=jpeg80_abi
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - gcc
+            - nasm
