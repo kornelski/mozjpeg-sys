@@ -15,6 +15,9 @@ version = "0.5.4"
 
 [build-dependencies]
 
+[build-dependencies]
+dunce = "0.1.1"
+
 [build-dependencies.cc]
 features = ["parallel"]
 version = "1.0.3"

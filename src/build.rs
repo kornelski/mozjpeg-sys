@@ -1,8 +1,10 @@
+extern crate dunce;
 extern crate cc;
 #[cfg(feature = "nasm_simd")]
 extern crate nasm_rs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
+use std::env;
 
 fn main() {
     let mut c = cc::Build::new();
@@ -16,7 +18,10 @@ fn main() {
         File::create(jconfig).unwrap();
     }
 
-    c.include("vendor");
+    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let vendor = dunce::canonicalize(root.join("vendor")).unwrap();
+
+    c.include(&vendor);
     c.warnings(false);
 
     let files = &[
@@ -99,7 +104,7 @@ fn main() {
         } else if cfg!(target_arch = "aarch64") {
             c.file("vendor/simd/jsimd_arm64.c");
         }
-        build_nasm();
+        build_nasm(&vendor);
     }
 
     if !cfg!(feature = "nasm_simd") {
@@ -110,8 +115,10 @@ fn main() {
 }
 
 #[cfg(feature = "nasm_simd")]
-fn build_nasm() {
-    let mut flags = vec!["-Ivendor/simd/", "-Ivendor/win/"];
+fn build_nasm(vendor_dir: &Path) {
+    let simd_include = format!("-I{}/", vendor_dir.join("simd").display()); // MUST have slash!
+    let win_include = format!("-I{}/", vendor_dir.join("win").display());
+    let mut flags = vec![simd_include.as_str(), win_include.as_str()];
     if std::env::var("PROFILE").map(|s| "debug" == s).unwrap_or(false) {
         flags.push("-g");
     }
