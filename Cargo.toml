@@ -11,9 +11,7 @@ homepage = "https://github.com/pornel/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.5.4"
-
-[build-dependencies]
+version = "0.5.5"
 
 [build-dependencies]
 dunce = "0.1.1"
