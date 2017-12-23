@@ -1,8 +1,19 @@
 extern crate cc;
 extern crate nasm_rs;
+use std::path::Path;
+use std::fs::File;
 
 fn main() {
     let mut c = cc::Build::new();
+
+    let jconfigint = Path::new("vendor/jconfigint.h");
+    if !jconfigint.exists() {
+        File::create(jconfigint).unwrap();
+    }
+    let jconfig = Path::new("vendor/jconfig.h");
+    if !jconfig.exists() {
+        File::create(jconfig).unwrap();
+    }
 
     c.include("vendor");
     c.warnings(false);
