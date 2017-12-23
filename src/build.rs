@@ -1,4 +1,5 @@
 extern crate cc;
+#[cfg(feature = "nasm_simd")]
 extern crate nasm_rs;
 use std::path::Path;
 use std::fs::File;
@@ -80,7 +81,8 @@ fn main() {
         c.file("vendor/jdatasrc-tj.c");
     }
 
-    if cfg!(feature = "nasm_simd") {
+    #[cfg(feature = "nasm_simd")]
+    {
         c.include("vendor/simd");
         c.define("WITH_SIMD", Some("1"));
 
@@ -98,13 +100,16 @@ fn main() {
             c.file("vendor/simd/jsimd_arm64.c");
         }
         build_nasm();
-    } else {
+    }
+
+    if !cfg!(feature = "nasm_simd") {
         c.file("vendor/jsimd_none.c");
     }
 
     c.compile(&format!("libmozjpeg{}.a", abi));
 }
 
+#[cfg(feature = "nasm_simd")]
 fn build_nasm() {
     let mut flags = vec!["-Ivendor/simd/", "-Ivendor/win/"];
     if std::env::var("PROFILE").map(|s| "debug" == s).unwrap_or(false) {

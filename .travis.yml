@@ -1,8 +1,6 @@
 language: rust
 script:
-  - cargo test --verbose --all
-  - cargo test --verbose --all --features=jpeg70_abi
-  - cargo test --verbose --all --features=jpeg80_abi
+  - cargo test --verbose --all --no-default-features && cargo test --features=jpeg70_abi && cargo test --features=jpeg80_abi && cargo test --verbose --all
 matrix:
   include:
     - os: linux
