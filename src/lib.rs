@@ -17,7 +17,13 @@ pub use JINT_COMPRESS_PROFILE_VALUE::*;
 pub use J_DCT_METHOD::JDCT_ISLOW as JDCT_DEFAULT;
 pub use J_DCT_METHOD::JDCT_IFAST as JDCT_FASTEST;
 
+#[cfg(feature = "jpeg80_abi")]
+pub const JPEG_LIB_VERSION: c_int = 80;
+#[cfg(all(feature = "jpeg70_abi", not(feature = "jpeg80_abi")))]
+pub const JPEG_LIB_VERSION: c_int = 70;
+#[cfg(not(feature = "jpeg70_abi"))] // ABI 80 implies ABI 70
 pub const JPEG_LIB_VERSION: c_int = 62;
+
 /// The basic DCT block is 8x8 samples
 pub const DCTSIZE: usize = 8;
 /// DCTSIZE²
@@ -27,6 +33,8 @@ pub const DCTSIZE2: usize = DCTSIZE*DCTSIZE;
 pub const JPOOL_PERMANENT: c_int = 0;
 /// lasts until done with image/datastream
 pub const JPOOL_IMAGE: c_int     = 1;
+/// Quantization tables are numbered 0..3
+pub const NUM_QUANT_TBLS: usize  = 4;
 
 pub type boolean = c_int;
 pub type JSAMPLE = u8;
@@ -100,8 +108,15 @@ pub struct jpeg_component_info {
     pub ac_tbl_no: c_int,
     pub width_in_blocks: JDIMENSION,
     pub height_in_blocks: JDIMENSION,
+
     /// Remaining fields should be treated as private by applications.
+    #[cfg(feature = "jpeg70_abi")]
+    DCT_h_scaled_size: c_int,
+    #[cfg(feature = "jpeg70_abi")]
+    DCT_v_scaled_size: c_int,
+    #[cfg(not(feature = "jpeg70_abi"))]
     DCT_scaled_size: c_int,
+
     downsampled_width: JDIMENSION,
     downsampled_height: JDIMENSION,
     component_needed: boolean,
@@ -304,13 +319,40 @@ pub struct jpeg_compress_struct {
     pub in_color_space: J_COLOR_SPACE,
     /// image gamma of input image
     pub input_gamma: f64,
+
+    #[cfg(feature = "jpeg70_abi")]
+    /// fraction by which to scale image
+    scale_num: c_uint,
+    #[cfg(feature = "jpeg70_abi")]
+    /// fraction by which to scale image
+    scale_denom: c_uint,
+
+    /// scaled JPEG image width
+    ///
+    /// Dimensions of actual JPEG image that will be written to file,
+    /// derived from input dimensions by scaling factors.
+    /// These fields are computed by `jpeg_start_compress()`.
+    /// You can also use `jpeg_calc_jpeg_dimensions()` to determine these values
+    /// in advance of calling `jpeg_start_compress()`.
+    #[cfg(feature = "jpeg70_abi")]
+    jpeg_width: JDIMENSION,
+    /// scaled JPEG image height
+    #[cfg(feature = "jpeg70_abi")]
+    jpeg_height: JDIMENSION,
+
+
+
     /// bits of precision in image data
     pub data_precision: c_int,
     pub num_components: c_int,
     pub jpeg_color_space: J_COLOR_SPACE,
-    /// comp_info[i] describes component that appears i'th in SOF
+    /// `comp_info[i]` describes component that appears i'th in SOF
     pub comp_info: *mut jpeg_component_info,
     pub quant_tbl_ptrs: [*mut JQUANT_TBL; 4usize],
+
+    #[cfg(feature = "jpeg70_abi")]
+    q_scale_factor: [c_int; NUM_QUANT_TBLS],
+
     /// ptrs to coefficient quantization tables, or NULL if not defined,
     /// and corresponding scale factors (percentage, initialized 100).
     pub dc_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
@@ -326,6 +368,9 @@ pub struct jpeg_compress_struct {
     /// TRUE=optimize entropy encoding parms
     pub optimize_coding: boolean,
     pub CCIR601_sampling: boolean,
+    /// TRUE=apply fancy downsampling
+    #[cfg(feature = "jpeg70_abi")]
+    pub do_fancy_downsampling: boolean,
     pub smoothing_factor: c_int,
     pub dct_method: J_DCT_METHOD,
     /// MCUs per restart, or 0 for no restart
@@ -345,6 +390,13 @@ pub struct jpeg_compress_struct {
     progressive_mode: boolean,
     pub max_h_samp_factor: c_int,
     pub max_v_samp_factor: c_int,
+    /// smallest DCT_h_scaled_size of any component
+    #[cfg(feature = "jpeg70_abi")]
+    min_DCT_h_scaled_size: c_int,
+    /// smallest DCT_v_scaled_size of any component
+    #[cfg(feature = "jpeg70_abi")]
+    min_DCT_v_scaled_size: c_int,
+
     total_iMCU_rows: JDIMENSION,
     comps_in_scan: c_int,
     cur_comp_info: [*mut jpeg_component_info; 4usize],
@@ -356,6 +408,16 @@ pub struct jpeg_compress_struct {
     Se: c_int,
     Ah: c_int,
     Al: c_int,
+    /// the basic DCT block size: 1..16
+    #[cfg(feature = "jpeg80_abi")]
+    block_size: c_int,
+    /// natural-order position array
+    #[cfg(feature = "jpeg80_abi")]
+    natural_order: *const c_int,
+    /// min( Se, DCTSIZE2-1 )
+    #[cfg(feature = "jpeg80_abi")]
+    lim_Se: c_int,
+
     master: *mut jpeg_comp_master,
     main: *mut jpeg_c_main_controller,
     prep: *mut jpeg_c_prep_controller,
@@ -461,7 +523,12 @@ pub struct jpeg_decompress_struct {
     ac_huff_tbl_ptrs: [*mut JHUFF_TBL; 4usize],
     data_precision: c_int,
     pub comp_info: *mut jpeg_component_info,
+
+    /// TRUE if Baseline SOF0 encountered
+    #[cfg(feature = "jpeg80_abi")]
+    is_baseline: boolean,
     progressive_mode: boolean,
+
     arith_code: boolean,
     arith_dc_L: [u8; 16usize],
     arith_dc_U: [u8; 16usize],
@@ -480,6 +547,15 @@ pub struct jpeg_decompress_struct {
     /// These fields are computed during decompression startup
     pub max_h_samp_factor: c_int,
     pub max_v_samp_factor: c_int,
+
+    /// smallest DCT_h_scaled_size of any component
+    #[cfg(feature = "jpeg70_abi")]
+    min_DCT_h_scaled_size: c_int,
+    /// smallest DCT_v_scaled_size of any component
+    #[cfg(feature = "jpeg70_abi")]
+    min_DCT_v_scaled_size: c_int,
+    /// smallest DCT_scaled_size of any component
+    #[cfg(not(feature = "jpeg70_abi"))]
     min_DCT_scaled_size: c_int,
     total_iMCU_rows: JDIMENSION,
     sample_range_limit: *mut JSAMPLE,
@@ -493,6 +569,17 @@ pub struct jpeg_decompress_struct {
     Se: c_int,
     Ah: c_int,
     Al: c_int,
+
+    /// the basic DCT block size: 1..16
+    #[cfg(feature = "jpeg80_abi")]
+    block_size: c_int,
+    /// natural-order position array for entropy decode
+    #[cfg(feature = "jpeg80_abi")]
+    natural_order: *const c_int,
+    /// min( Se, DCTSIZE2-1 ) for entropy decode
+    #[cfg(feature = "jpeg80_abi")]
+    lim_Se: c_int,
+
     unread_marker: c_int,
     master: *mut jpeg_decomp_master,
     main: *mut jpeg_d_main_controller,
@@ -697,9 +784,12 @@ extern "C" {
     pub fn jpeg_start_output(cinfo: &mut jpeg_decompress_struct, scan_number: c_int) -> boolean;
     pub fn jpeg_finish_output(cinfo: &mut jpeg_decompress_struct) -> boolean;
     pub fn jpeg_input_complete(cinfo: &jpeg_decompress_struct) -> boolean;
-    // #[deprecated]
+    #[deprecated]
     pub fn jpeg_new_colormap(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_consume_input(cinfo: &mut jpeg_decompress_struct) -> c_int;
+    /// Precalculate JPEG dimensions for current compression parameters
+    #[cfg(feature = "jpeg70_abi")]
+    pub fn jpeg_calc_jpeg_dimensions(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_calc_output_dimensions(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_save_markers(cinfo: &mut jpeg_decompress_struct,
                          marker_code: c_int,
@@ -727,6 +817,7 @@ extern "C" {
     pub fn jpeg_c_int_param_supported(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> boolean;
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
+    pub fn jpeg_set_idct_method_selector(cinfo: &jpeg_compress_struct, param: *const c_void);
     #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
     #[cfg(test)] #[allow(dead_code)] fn jsimd_can_fdct_ifast() -> c_int;
     #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast_sse2(block: *mut DCTELEM);
@@ -771,12 +862,11 @@ pub fn try_compress() {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
         let mut cinfo: jpeg_compress_struct = mem::zeroed();
-        let size = mem::size_of_val(&cinfo) as usize;
         cinfo.common.err = &mut err;
         if 0 == jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_TRELLIS_QUANT) {
             panic!("Not linked to mozjpeg?");
         }
-        jpeg_CreateCompress(&mut cinfo, JPEG_LIB_VERSION, size);
+        jpeg_create_compress(&mut cinfo);
         jpeg_destroy_compress(&mut cinfo);
     }
 }

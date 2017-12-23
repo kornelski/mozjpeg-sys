@@ -38,7 +38,15 @@ fn main() {
     c.define("INLINE", Some("inline"));
 
     c.define("MEM_SRCDST_SUPPORTED", Some("1"));
-    c.define("JPEG_LIB_VERSION", Some("62"));
+    let abi = if cfg!(feature = "jpeg80_abi") {
+        "80"
+    } else if cfg!(feature = "jpeg70_abi") {
+        "70"
+    } else {
+        "62"
+    };
+    c.define("JPEG_LIB_VERSION", Some(abi));
+
     c.define("BITS_IN_JSAMPLE", Some("8"));
 
     if cfg!(feature = "arith_enc") {
@@ -83,7 +91,7 @@ fn main() {
         c.file("vendor/jsimd_none.c");
     }
 
-    c.compile("libmozjpeg.a");
+    c.compile(&format!("libmozjpeg{}.a", abi));
 }
 
 fn build_nasm() {

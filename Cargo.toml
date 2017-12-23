@@ -36,6 +36,8 @@ arith_enc = []
 default = ["nasm_simd"]
 nasm_simd = ["nasm-rs", "nasm-rs/parallel"]
 turbojpeg_api = []
+jpeg70_abi = ["arith_dec", "arith_enc"]
+jpeg80_abi = ["jpeg70_abi"]
 
 [lib]
 name = "mozjpeg_sys"
