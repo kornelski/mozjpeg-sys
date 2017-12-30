@@ -5,6 +5,7 @@ extern crate nasm_rs;
 use std::path::{Path, PathBuf};
 use std::fs;
 use std::env;
+use std::process;
 use std::io::Write;
 
 fn main() {
@@ -107,8 +108,11 @@ fn main() {
         c.file("vendor/jdatasrc-tj.c");
     }
 
+    let with_nasm = cfg!(feature = "nasm_simd") && nasm_supported();
+
     #[cfg(feature = "nasm_simd")]
     {
+        if with_nasm {
         c.include("vendor/simd");
         jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
@@ -126,14 +130,33 @@ fn main() {
             c.file("vendor/simd/jsimd_arm64.c");
         }
         build_nasm(&vendor);
+        }
     }
     drop(jconfig_h); // close the file
 
-    if !cfg!(feature = "nasm_simd") {
+    if !with_nasm {
         c.file("vendor/jsimd_none.c");
     }
 
     c.compile(&format!("mozjpeg{}", abi));
+}
+
+fn nasm_supported() -> bool {
+    match process::Command::new("nasm").arg("-v").output() {
+        Err(e) => {
+            println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {}", e);
+            false
+        },
+        Ok(out) => {
+            let ver = String::from_utf8_lossy(&out.stdout);
+            if ver.contains("NASM version 0.") {
+                println!("cargo:warning=Installed NASM is outdated and useless. Mozjpeg's SIMD won't be enabled: {}", ver);
+                false
+            } else {
+                true
+            }
+        }
+    }
 }
 
 #[cfg(feature = "nasm_simd")]
