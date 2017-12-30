@@ -52,7 +52,15 @@ fn main() {
     let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).unwrap();
     write!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
-        #define INLINE inline
+        #ifndef INLINE
+            #if defined(__GNUC__)
+                #define INLINE inline __attribute__((always_inline))
+            #elif defined(_MSC_VER)
+                #define INLINE __forceinline
+            #else
+                #define INLINE inline
+            #endif
+        #endif
         #define PACKAGE_NAME "{PACKAGE_NAME}"
         #define VERSION "{VERSION}"
         #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
@@ -125,7 +133,7 @@ fn main() {
         c.file("vendor/jsimd_none.c");
     }
 
-    c.compile(&format!("libmozjpeg{}.a", abi));
+    c.compile(&format!("mozjpeg{}", abi));
 }
 
 #[cfg(feature = "nasm_simd")]
@@ -173,6 +181,12 @@ fn build_nasm(vendor_dir: &Path) {
         panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
     };
 
-    nasm_rs::compile_library_args("libmozjpegsimd.a", files, &flags);
+    let name = if cfg!(target_env = "msvc") {
+        "mozjpegsimd.lib"
+    } else {
+        "libmozjpegsimd.a"
+    };
+
+    nasm_rs::compile_library_args(name, files, &flags);
     println!("cargo:rustc-link-lib=static=mozjpegsimd");
 }
