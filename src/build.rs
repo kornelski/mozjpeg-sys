@@ -3,25 +3,22 @@ extern crate cc;
 #[cfg(feature = "nasm_simd")]
 extern crate nasm_rs;
 use std::path::{Path, PathBuf};
-use std::fs::File;
+use std::fs;
 use std::env;
+use std::io::Write;
 
 fn main() {
     let mut c = cc::Build::new();
-
-    let jconfigint = Path::new("vendor/jconfigint.h");
-    if !jconfigint.exists() {
-        File::create(jconfigint).unwrap();
-    }
-    let jconfig = Path::new("vendor/jconfig.h");
-    if !jconfig.exists() {
-        File::create(jconfig).unwrap();
-    }
-
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let config_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("include");
     let vendor = dunce::canonicalize(root.join("vendor")).unwrap();
 
+    fs::create_dir_all(&config_dir).unwrap();
+
+    println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).unwrap().to_str().unwrap());
+    c.include(&config_dir);
     c.include(&vendor);
+
     c.warnings(false);
 
     let files = &[
@@ -43,18 +40,6 @@ fn main() {
         c.file(file);
     }
 
-    c.define("PACKAGE_NAME", Some(format!("\"{}\"", env!("CARGO_PKG_NAME")).as_str()));
-    c.define("VERSION", Some(format!("\"{}\"", env!("CARGO_PKG_VERSION")).as_str()));
-    c.define("BUILD", Some(format!("\"{}-mozjpeg-sys\"", std::time::UNIX_EPOCH.elapsed().unwrap().as_secs()).as_str()));
-
-    c.define("STDC_HEADERS", Some("1"));
-    c.define("HAVE_UNSIGNED_CHAR", Some("1"));
-    c.define("HAVE_UNSIGNED_SHORT", Some("1"));
-    c.define("HAVE_STDLIB_H", Some("1"));
-    c.define("SIZEOF_SIZE_T", Some(if cfg!(target_pointer_width = 32) {"4"} else {"8"}));
-    c.define("INLINE", Some("inline"));
-
-    c.define("MEM_SRCDST_SUPPORTED", Some("1"));
     let abi = if cfg!(feature = "jpeg80_abi") {
         "80"
     } else if cfg!(feature = "jpeg70_abi") {
@@ -62,24 +47,52 @@ fn main() {
     } else {
         "62"
     };
-    c.define("JPEG_LIB_VERSION", Some(abi));
+    println!("cargo:lib_version={}", abi);
 
-    c.define("BITS_IN_JSAMPLE", Some("8"));
+    let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).unwrap();
+    write!(jconfigint_h, r#"
+        #define BUILD "{timestamp}-mozjpeg-sys"
+        #define INLINE inline
+        #define PACKAGE_NAME "{PACKAGE_NAME}"
+        #define VERSION "{VERSION}"
+        #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
+        "#,
+        timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
+        PACKAGE_NAME = env::var("CARGO_PKG_NAME").unwrap(),
+        VERSION = env::var("CARGO_PKG_VERSION").unwrap(),
+        SIZEOF_SIZE_T = if cfg!(target_pointer_width = 32) {"4"} else {"8"}
+    ).unwrap();
+    drop(jconfigint_h); // close the file
+
+    let mut jconfig_h = fs::File::create(config_dir.join("jconfig.h")).unwrap();
+    write!(jconfig_h, r#"
+        #define JPEG_LIB_VERSION {JPEG_LIB_VERSION}
+        #define LIBJPEG_TURBO_VERSION 0
+        #define BITS_IN_JSAMPLE 8
+        #define STDC_HEADERS 1
+        #define HAVE_STDLIB_H 1
+        #define HAVE_UNSIGNED_CHAR 1
+        #define HAVE_UNSIGNED_SHORT 1
+        #define MEM_SRCDST_SUPPORTED 1
+        "#,
+        JPEG_LIB_VERSION = abi
+    ).unwrap();
 
     if cfg!(feature = "arith_enc") {
-        c.define("C_ARITH_CODING_SUPPORTED", Some("1"));
+        jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").unwrap();
         c.file("vendor/jcarith.c");
     }
     if cfg!(feature = "arith_dec") {
-        c.define("D_ARITH_CODING_SUPPORTED", Some("1"));
+        jconfig_h.write_all(b"#define D_ARITH_CODING_SUPPORTED 1\n").unwrap();
         c.file("vendor/jdarith.c");
     }
+
+
     if cfg!(feature = "arith_enc") || cfg!(feature = "arith_dec") {
         c.file("vendor/jaricom.c");
     }
 
     if cfg!(feature = "turbojpeg_api") {
-        c.define("WITH_TURBOJPEG", Some("1"));
         c.file("vendor/turbojpeg.c");
         c.file("vendor/transupp.c");
         c.file("vendor/jdatadst-tj.c");
@@ -89,7 +102,7 @@ fn main() {
     #[cfg(feature = "nasm_simd")]
     {
         c.include("vendor/simd");
-        c.define("WITH_SIMD", Some("1"));
+        jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
         if cfg!(target_arch = "x86_64") {
             c.file("vendor/simd/jsimd_x86_64.c");
@@ -106,6 +119,7 @@ fn main() {
         }
         build_nasm(&vendor);
     }
+    drop(jconfig_h); // close the file
 
     if !cfg!(feature = "nasm_simd") {
         c.file("vendor/jsimd_none.c");
