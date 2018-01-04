@@ -113,7 +113,7 @@ fn main() {
     #[cfg(feature = "nasm_simd")]
     {
         if with_nasm {
-        c.include("vendor/simd");
+        c.include(vendor.join("simd"));
         jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
         if cfg!(target_arch = "x86_64") {
@@ -161,15 +161,16 @@ fn nasm_supported() -> bool {
 
 #[cfg(feature = "nasm_simd")]
 fn build_nasm(vendor_dir: &Path) {
-    let simd_include = format!("-I{}/", vendor_dir.join("simd").display()); // MUST have slash!
-    let win_include = format!("-I{}/", vendor_dir.join("win").display());
-    let mut flags = vec![simd_include.as_str(), win_include.as_str()];
+    let mut n = nasm_rs::Build::new();
+
+    n.include(vendor_dir.join("simd"));
+    n.include(vendor_dir.join("win"));
     if std::env::var("PROFILE").map(|s| "debug" == s).unwrap_or(false) {
-        flags.push("-g");
+        n.debug(true);
     }
 
     if cfg!(target_os = "linux") {
-        flags.push("-DELF");
+        n.define("ELF", None);
     }
 
     let x86_64 = [
@@ -196,7 +197,7 @@ fn build_nasm(vendor_dir: &Path) {
     ];
 
     let files: &[_] = if cfg!(target_arch = "x86_64") {
-        flags.push("-D__x86_64__");
+        n.define("__x86_64__", None);
         &x86_64
     } else if cfg!(target_arch = "x86") {
         &x86
@@ -204,12 +205,16 @@ fn build_nasm(vendor_dir: &Path) {
         panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
     };
 
+    for file in files {
+        n.file(file);
+    }
+
     let name = if cfg!(target_env = "msvc") {
         "mozjpegsimd.lib"
     } else {
         "libmozjpegsimd.a"
     };
 
-    nasm_rs::compile_library_args(name, files, &flags);
+    n.compile(name);
     println!("cargo:rustc-link-lib=static=mozjpegsimd");
 }
