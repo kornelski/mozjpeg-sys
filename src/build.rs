@@ -169,6 +169,8 @@ fn build_nasm(vendor_dir: &Path) {
         n.debug(true);
     }
 
+    n.define("PIC", None); // Rust always uses -fPIC
+
     if cfg!(target_os = "linux") {
         n.define("ELF", None);
     }
@@ -198,8 +200,14 @@ fn build_nasm(vendor_dir: &Path) {
 
     let files: &[_] = if cfg!(target_arch = "x86_64") {
         n.define("__x86_64__", None);
+        if cfg!(target_os = "windows") {
+            n.define("WIN64", None);
+        }
         &x86_64
     } else if cfg!(target_arch = "x86") {
+        if cfg!(target_os = "windows") {
+            n.define("WIN32", None);
+        }
         &x86
     } else {
         panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
