@@ -85,4 +85,3 @@ unsafe fn encode(buffer: &[u8], width: u32, height: u32) {
     jpeg_destroy_compress(&mut cinfo);
     libc::fclose(fh);
 }
-

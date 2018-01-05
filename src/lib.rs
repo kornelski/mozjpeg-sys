@@ -870,3 +870,675 @@ pub fn try_compress() {
         jpeg_destroy_compress(&mut cinfo);
     }
 }
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_JQUANT_TBL() {
+    assert_eq!(::std::mem::size_of::<JQUANT_TBL>(), 132usize, concat!("Size of: ", stringify!(JQUANT_TBL)));
+    assert_eq!(::std::mem::align_of::<JQUANT_TBL>(), 4usize, concat!("Alignment of ", stringify!(JQUANT_TBL)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<JQUANT_TBL>())).quantval as *const _ as usize }, 0usize, concat!("Offset of field: ", stringify!(JQUANT_TBL), "::", stringify!(quantval)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<JQUANT_TBL>())).sent_table as *const _ as usize }, 128usize, concat!("Offset of field: ", stringify!(JQUANT_TBL), "::", stringify!(sent_table)));
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_JHUFF_TBL() {
+    assert_eq!(::std::mem::size_of::<JHUFF_TBL>(), 280usize, concat!("Size of: ", stringify!(JHUFF_TBL)));
+    assert_eq!(::std::mem::align_of::<JHUFF_TBL>(), 4usize, concat!("Alignment of ", stringify!(JHUFF_TBL)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<JHUFF_TBL>())).bits as *const _ as usize }, 0usize, concat!("Offset of field: ", stringify!(JHUFF_TBL), "::", stringify!(bits)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<JHUFF_TBL>())).huffval as *const _ as usize }, 17usize, concat!("Offset of field: ", stringify!(JHUFF_TBL), "::", stringify!(huffval)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<JHUFF_TBL>())).sent_table as *const _ as usize }, 276usize, concat!("Offset of field: ", stringify!(JHUFF_TBL), "::", stringify!(sent_table)));
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_component_info() {
+    assert_eq!(::std::mem::align_of::<jpeg_component_info>(), 4usize, concat!("Alignment of ", stringify!(jpeg_component_info)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).component_id as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(component_id))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).component_index as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(component_index))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).h_samp_factor as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(h_samp_factor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).v_samp_factor as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(v_samp_factor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).quant_tbl_no as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(quant_tbl_no))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).dc_tbl_no as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(dc_tbl_no))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).ac_tbl_no as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(ac_tbl_no))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).width_in_blocks as *const _ as usize },
+        28usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(width_in_blocks))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_component_info>())).height_in_blocks as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(jpeg_component_info), "::", stringify!(height_in_blocks))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_scan_info() {
+    assert_eq!(::std::mem::size_of::<jpeg_scan_info>(), 36usize, concat!("Size of: ", stringify!(jpeg_scan_info)));
+    assert_eq!(::std::mem::align_of::<jpeg_scan_info>(), 4usize, concat!("Alignment of ", stringify!(jpeg_scan_info)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).comps_in_scan as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(comps_in_scan))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).component_index as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(component_index))
+    );
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).Ss as *const _ as usize }, 20usize, concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(Ss)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).Se as *const _ as usize }, 24usize, concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(Se)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).Ah as *const _ as usize }, 28usize, concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(Ah)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_scan_info>())).Al as *const _ as usize }, 32usize, concat!("Offset of field: ", stringify!(jpeg_scan_info), "::", stringify!(Al)));
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_marker_struct() {
+    assert_eq!(::std::mem::size_of::<jpeg_marker_struct>(), 20usize, concat!("Size of: ", stringify!(jpeg_marker_struct)));
+    assert_eq!(::std::mem::align_of::<jpeg_marker_struct>(), 4usize, concat!("Alignment of ", stringify!(jpeg_marker_struct)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_marker_struct>())).next as *const _ as usize }, 0usize, concat!("Offset of field: ", stringify!(jpeg_marker_struct), "::", stringify!(next)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_marker_struct>())).marker as *const _ as usize }, 4usize, concat!("Offset of field: ", stringify!(jpeg_marker_struct), "::", stringify!(marker)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_marker_struct>())).original_length as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_marker_struct), "::", stringify!(original_length))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_marker_struct>())).data_length as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_marker_struct), "::", stringify!(data_length))
+    );
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_marker_struct>())).data as *const _ as usize }, 16usize, concat!("Offset of field: ", stringify!(jpeg_marker_struct), "::", stringify!(data)));
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_common_struct() {
+    assert_eq!(::std::mem::size_of::<jpeg_common_struct>(), 24usize, concat!("Size of: ", stringify!(jpeg_common_struct)));
+    assert_eq!(::std::mem::align_of::<jpeg_common_struct>(), 4usize, concat!("Alignment of ", stringify!(jpeg_common_struct)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).err as *const _ as usize }, 0usize, concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(err)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).mem as *const _ as usize }, 4usize, concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(mem)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).progress as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(progress))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).client_data as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(client_data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).is_decompressor as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(is_decompressor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_common_struct>())).global_state as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_common_struct), "::", stringify!(global_state))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_compress_struct() {
+    assert_eq!(::std::mem::align_of::<jpeg_compress_struct>(), 4usize, concat!("Alignment of ", stringify!(jpeg_compress_struct)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.err as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(err))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.mem as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(mem))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.progress as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(progress))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.client_data as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(client_data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.is_decompressor as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(is_decompressor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).common.global_state as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(global_state))
+    );
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).dest as *const _ as usize }, 24usize, concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(dest)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).image_width as *const _ as usize },
+        28usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(image_width))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).image_height as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(image_height))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).input_components as *const _ as usize },
+        36usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(input_components))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).in_color_space as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(in_color_space))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_compress_struct>())).input_gamma as *const _ as usize },
+        44usize,
+        concat!("Offset of field: ", stringify!(jpeg_compress_struct), "::", stringify!(input_gamma))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_decompress_struct() {
+    assert_eq!(::std::mem::align_of::<jpeg_decompress_struct>(), 4usize, concat!("Alignment of ", stringify!(jpeg_decompress_struct)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.err as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(err))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.mem as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(mem))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.progress as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(progress))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.client_data as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(client_data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.is_decompressor as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(is_decompressor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).common.global_state as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(global_state))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).src as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(src))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).image_width as *const _ as usize },
+        28usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(image_width))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).image_height as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(image_height))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).num_components as *const _ as usize },
+        36usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(num_components))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).jpeg_color_space as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(jpeg_color_space))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).out_color_space as *const _ as usize },
+        44usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(out_color_space))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).scale_num as *const _ as usize },
+        48usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(scale_num))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).scale_denom as *const _ as usize },
+        52usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(scale_denom))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_gamma as *const _ as usize },
+        56usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_gamma))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).buffered_image as *const _ as usize },
+        64usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(buffered_image))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).raw_data_out as *const _ as usize },
+        68usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(raw_data_out))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).dct_method as *const _ as usize },
+        72usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(dct_method))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).do_fancy_upsampling as *const _ as usize },
+        76usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(do_fancy_upsampling))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).do_block_smoothing as *const _ as usize },
+        80usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(do_block_smoothing))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).quantize_colors as *const _ as usize },
+        84usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(quantize_colors))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).dither_mode as *const _ as usize },
+        88usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(dither_mode))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).two_pass_quantize as *const _ as usize },
+        92usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(two_pass_quantize))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).desired_number_of_colors as *const _ as usize },
+        96usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(desired_number_of_colors))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).enable_1pass_quant as *const _ as usize },
+        100usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(enable_1pass_quant))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).enable_external_quant as *const _ as usize },
+        104usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(enable_external_quant))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).enable_2pass_quant as *const _ as usize },
+        108usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(enable_2pass_quant))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_width as *const _ as usize },
+        112usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_width))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_height as *const _ as usize },
+        116usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_height))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).out_color_components as *const _ as usize },
+        120usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(out_color_components))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_components as *const _ as usize },
+        124usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_components))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).rec_outbuf_height as *const _ as usize },
+        128usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(rec_outbuf_height))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).actual_number_of_colors as *const _ as usize },
+        132usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(actual_number_of_colors))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).colormap as *const _ as usize },
+        136usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(colormap))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_scanline as *const _ as usize },
+        140usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_scanline))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).input_scan_number as *const _ as usize },
+        144usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(input_scan_number))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).input_iMCU_row as *const _ as usize },
+        148usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(input_iMCU_row))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_scan_number as *const _ as usize },
+        152usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_scan_number))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).output_iMCU_row as *const _ as usize },
+        156usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(output_iMCU_row))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).coef_bits as *const _ as usize },
+        160usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(coef_bits))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).quant_tbl_ptrs as *const _ as usize },
+        164usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(quant_tbl_ptrs))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).dc_huff_tbl_ptrs as *const _ as usize },
+        180usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(dc_huff_tbl_ptrs))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).ac_huff_tbl_ptrs as *const _ as usize },
+        196usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(ac_huff_tbl_ptrs))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).data_precision as *const _ as usize },
+        212usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(data_precision))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_decompress_struct>())).comp_info as *const _ as usize },
+        216usize,
+        concat!("Offset of field: ", stringify!(jpeg_decompress_struct), "::", stringify!(comp_info))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_error_mgr() {
+    assert_eq!(::std::mem::size_of::<jpeg_error_mgr>(), 132usize, concat!("Size of: ", stringify!(jpeg_error_mgr)));
+    assert_eq!(::std::mem::align_of::<jpeg_error_mgr>(), 4usize, concat!("Alignment of ", stringify!(jpeg_error_mgr)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).error_exit as *const _ as usize }, 0usize, concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(error_exit)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).emit_message as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(emit_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).output_message as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(output_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).format_message as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(format_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).reset_error_mgr as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(reset_error_mgr))
+    );
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).msg_code as *const _ as usize }, 20usize, concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(msg_code)));
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).msg_parm as *const _ as usize }, 24usize, concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(msg_parm)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).trace_level as *const _ as usize },
+        104usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(trace_level))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).num_warnings as *const _ as usize },
+        108usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(num_warnings))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).jpeg_message_table as *const _ as usize },
+        112usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(jpeg_message_table))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).last_jpeg_message as *const _ as usize },
+        116usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(last_jpeg_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).addon_message_table as *const _ as usize },
+        120usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(addon_message_table))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).first_addon_message as *const _ as usize },
+        124usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(first_addon_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_error_mgr>())).last_addon_message as *const _ as usize },
+        128usize,
+        concat!("Offset of field: ", stringify!(jpeg_error_mgr), "::", stringify!(last_addon_message))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_progress_mgr() {
+    assert_eq!(::std::mem::size_of::<jpeg_progress_mgr>(), 20usize, concat!("Size of: ", stringify!(jpeg_progress_mgr)));
+    assert_eq!(::std::mem::align_of::<jpeg_progress_mgr>(), 4usize, concat!("Alignment of ", stringify!(jpeg_progress_mgr)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_progress_mgr>())).progress_monitor as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_progress_mgr), "::", stringify!(progress_monitor))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_progress_mgr>())).pass_counter as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_progress_mgr), "::", stringify!(pass_counter))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_progress_mgr>())).pass_limit as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_progress_mgr), "::", stringify!(pass_limit))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_progress_mgr>())).completed_passes as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_progress_mgr), "::", stringify!(completed_passes))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_progress_mgr>())).total_passes as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_progress_mgr), "::", stringify!(total_passes))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_destination_mgr() {
+    assert_eq!(::std::mem::size_of::<jpeg_destination_mgr>(), 20usize, concat!("Size of: ", stringify!(jpeg_destination_mgr)));
+    assert_eq!(::std::mem::align_of::<jpeg_destination_mgr>(), 4usize, concat!("Alignment of ", stringify!(jpeg_destination_mgr)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_destination_mgr>())).next_output_byte as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_destination_mgr), "::", stringify!(next_output_byte))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_destination_mgr>())).free_in_buffer as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_destination_mgr), "::", stringify!(free_in_buffer))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_destination_mgr>())).init_destination as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_destination_mgr), "::", stringify!(init_destination))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_destination_mgr>())).empty_output_buffer as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_destination_mgr), "::", stringify!(empty_output_buffer))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_destination_mgr>())).term_destination as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_destination_mgr), "::", stringify!(term_destination))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_source_mgr() {
+    assert_eq!(::std::mem::size_of::<jpeg_source_mgr>(), 28usize, concat!("Size of: ", stringify!(jpeg_source_mgr)));
+    assert_eq!(::std::mem::align_of::<jpeg_source_mgr>(), 4usize, concat!("Alignment of ", stringify!(jpeg_source_mgr)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).next_input_byte as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(next_input_byte))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).bytes_in_buffer as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(bytes_in_buffer))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).init_source as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(init_source))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).fill_input_buffer as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(fill_input_buffer))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).skip_input_data as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(skip_input_data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).resync_to_restart as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(resync_to_restart))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_source_mgr>())).term_source as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(jpeg_source_mgr), "::", stringify!(term_source))
+    );
+}
+
+#[test]
+#[cfg(target_pointer_width = "32")]
+fn bindgen_test_layout_jpeg_memory_mgr() {
+    assert_eq!(::std::mem::size_of::<jpeg_memory_mgr>(), 52usize, concat!("Size of: ", stringify!(jpeg_memory_mgr)));
+    assert_eq!(::std::mem::align_of::<jpeg_memory_mgr>(), 4usize, concat!("Alignment of ", stringify!(jpeg_memory_mgr)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).alloc_small as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(alloc_small))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).alloc_large as *const _ as usize },
+        4usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(alloc_large))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).alloc_sarray as *const _ as usize },
+        8usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(alloc_sarray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).alloc_barray as *const _ as usize },
+        12usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(alloc_barray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).request_virt_sarray as *const _ as usize },
+        16usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(request_virt_sarray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).request_virt_barray as *const _ as usize },
+        20usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(request_virt_barray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).realize_virt_arrays as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(realize_virt_arrays))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).access_virt_sarray as *const _ as usize },
+        28usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(access_virt_sarray))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).access_virt_barray as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(access_virt_barray))
+    );
+    assert_eq!(unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).free_pool as *const _ as usize }, 36usize, concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(free_pool)));
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).self_destruct as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(self_destruct))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).max_memory_to_use as *const _ as usize },
+        44usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(max_memory_to_use))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<jpeg_memory_mgr>())).max_alloc_chunk as *const _ as usize },
+        48usize,
+        concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(max_alloc_chunk))
+    );
+}

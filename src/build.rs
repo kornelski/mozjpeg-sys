@@ -69,7 +69,7 @@ fn main() {
         timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
         PACKAGE_NAME = env::var("CARGO_PKG_NAME").unwrap(),
         VERSION = env::var("CARGO_PKG_VERSION").unwrap(),
-        SIZEOF_SIZE_T = if cfg!(target_pointer_width = 32) {"4"} else {"8"}
+        SIZEOF_SIZE_T = std::mem::size_of::<usize>()
     ).unwrap();
     drop(jconfigint_h); // close the file
 
