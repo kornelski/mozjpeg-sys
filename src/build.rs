@@ -2,6 +2,7 @@ extern crate dunce;
 extern crate cc;
 #[cfg(feature = "nasm_simd")]
 extern crate nasm_rs;
+#[allow(unused_imports)]
 use std::path::{Path, PathBuf};
 use std::fs;
 use std::env;
@@ -19,6 +20,9 @@ fn main() {
     println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).unwrap().to_str().unwrap());
     c.include(&config_dir);
     c.include(&vendor);
+    c.pic(true);
+
+    let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
 
     c.warnings(false);
 
@@ -69,7 +73,7 @@ fn main() {
         timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
         PACKAGE_NAME = env::var("CARGO_PKG_NAME").unwrap(),
         VERSION = env::var("CARGO_PKG_VERSION").unwrap(),
-        SIZEOF_SIZE_T = std::mem::size_of::<usize>()
+        SIZEOF_SIZE_T = if target_pointer_width == "32" {4} else {8}
     ).unwrap();
     drop(jconfigint_h); // close the file
 
@@ -113,23 +117,24 @@ fn main() {
     #[cfg(feature = "nasm_simd")]
     {
         if with_nasm {
-        c.include(vendor.join("simd"));
-        jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
+            c.include(vendor.join("simd"));
+            jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
-        if cfg!(target_arch = "x86_64") {
-            c.file("vendor/simd/jsimd_x86_64.c");
-        } else if cfg!(target_arch = "x86") {
-            c.file("vendor/simd/jsimd_i386.c");
-        } else if cfg!(target_arch = "mips") {
-            c.file("vendor/simd/jsimd_mips.c");
-        } else if cfg!(target_arch = "powerpc") || cfg!(target_arch = "powerpc64") {
-            c.file("vendor/simd/jsimd_powerpc.c");
-        } else if cfg!(target_arch = "arm") {
-            c.file("vendor/simd/jsimd_arm.c");
-        } else if cfg!(target_arch = "aarch64") {
-            c.file("vendor/simd/jsimd_arm64.c");
-        }
-        build_nasm(&vendor);
+            // cfg!(target_arch) doesn't work for cross-compiling.
+            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+            let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+
+            match target_arch.as_str() {
+                "x86_64" => {c.file("vendor/simd/jsimd_x86_64.c");},
+                "x86" => {c.file("vendor/simd/jsimd_i386.c");},
+                "mips" => {c.file("vendor/simd/jsimd_mips.c");},
+                "powerpc" | "powerpc64" => {c.file("vendor/simd/jsimd_powerpc.c");},
+                "arm" => {c.file("vendor/simd/jsimd_arm.c");},
+                "aarch64" => {c.file("vendor/simd/jsimd_arm64.c");},
+                _ => {},
+            };
+
+            build_nasm(&vendor, &target_arch, &target_os);
         }
     }
     drop(jconfig_h); // close the file
@@ -160,7 +165,7 @@ fn nasm_supported() -> bool {
 }
 
 #[cfg(feature = "nasm_simd")]
-fn build_nasm(vendor_dir: &Path) {
+fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) {
     let mut n = nasm_rs::Build::new();
 
     n.include(vendor_dir.join("simd"));
@@ -171,9 +176,12 @@ fn build_nasm(vendor_dir: &Path) {
 
     n.define("PIC", None); // Rust always uses -fPIC
 
-    if cfg!(target_os = "linux") {
-        n.define("ELF", None);
-    }
+    match (target_os, target_arch.ends_with("64")) {
+        ("windows", false) => n.define("WIN32", None),
+        ("windows", true) => n.define("WIN64", None),
+        ("macos", _) | ("ios", _) => n.define("MACHO", None),
+        _ => n.define("ELF", None),
+    };
 
     let x86_64 = [
         "vendor/simd/jfdctflt-sse-64.asm", "vendor/simd/jccolor-sse2-64.asm", "vendor/simd/jcgray-sse2-64.asm",
@@ -198,16 +206,10 @@ fn build_nasm(vendor_dir: &Path) {
         "vendor/simd/jquanti-sse2.asm",
     ];
 
-    let files: &[_] = if cfg!(target_arch = "x86_64") {
+    let files: &[_] = if target_arch == "x86_64" {
         n.define("__x86_64__", None);
-        if cfg!(target_os = "windows") {
-            n.define("WIN64", None);
-        }
         &x86_64
-    } else if cfg!(target_arch = "x86") {
-        if cfg!(target_os = "windows") {
-            n.define("WIN32", None);
-        }
+    } else if target_arch == "x86" {
         &x86
     } else {
         panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
