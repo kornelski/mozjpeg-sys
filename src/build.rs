@@ -132,9 +132,10 @@ fn main() {
                 "arm" => {c.file("vendor/simd/jsimd_arm.c");},
                 "aarch64" => {c.file("vendor/simd/jsimd_arm64.c");},
                 _ => {},
-            };
-
-            build_nasm(&vendor, &target_arch, &target_os);
+            }
+            for obj in build_nasm(&vendor, &target_arch, &target_os) {
+                c.object(obj);
+            }
         }
     }
     drop(jconfig_h); // close the file
@@ -165,7 +166,7 @@ fn nasm_supported() -> bool {
 }
 
 #[cfg(feature = "nasm_simd")]
-fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) {
+fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<PathBuf> {
     let mut n = nasm_rs::Build::new();
 
     n.include(vendor_dir.join("simd"));
@@ -215,16 +216,6 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) {
         panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
     };
 
-    for file in files {
-        n.file(file);
-    }
-
-    let name = if cfg!(target_env = "msvc") {
-        "mozjpegsimd.lib"
-    } else {
-        "libmozjpegsimd.a"
-    };
-
-    n.compile(name);
-    println!("cargo:rustc-link-lib=static=mozjpegsimd");
+    n.files(files);
+    n.compile_objects()
 }
