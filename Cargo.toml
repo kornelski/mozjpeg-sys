@@ -11,7 +11,7 @@ homepage = "https://github.com/kornelski/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.5.10"
+version = "0.5.11"
 
 [badges]
 travis-ci = { repository = "kornelski/mozjpeg-sys" }
