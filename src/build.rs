@@ -22,6 +22,10 @@ fn main() {
     c.include(&vendor);
     c.pic(true);
 
+    if let Ok(target_cpu) = env::var("TARGET_CPU") {
+        c.flag_if_supported(&format!("-march={}", target_cpu));
+    }
+
     let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
 
     c.warnings(false);
