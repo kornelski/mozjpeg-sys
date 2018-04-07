@@ -2,7 +2,7 @@
 
 See [crates.io](https://crates.io/crates/mozjpeg-sys).
 
-This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in a higher-level API :)
+This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in [a higher-level API](https://crates.io/crates/mozjpeg) :)
 
 Many fields in structs are marked as private by default, but if you need to access them, make a pull request marking them `pub`.
 
@@ -13,7 +13,7 @@ Many fields in structs are marked as private by default, but if you need to acce
 
 ## Usage
 
-In Rust add "mozjpeg-sys" as a dependency and use with `extern crate mozjpeg_sys`.
+Add "[mozjpeg-sys](https://crates.io/crates/mozjpeg-sys)" as a dependency in `Cargo.toml` and use with `extern crate mozjpeg_sys`.
 
 For non-Rust projects you can build the library using `cargo build --release`. It creates `target/release/libmozjpeg_sys.a` and `target/release/libmozjpeg_sys.{dll,so,dylib}`, which can be linked with C and other languages. In case you need the `jpeglib.h`header for C code built with Cargo, required include path**s** (use `env::split_paths()`) are set for Cargo [build scripts](http://doc.crates.io/environment-variables.html#environment-variables-cargo-sets-for-build-scripts) in the `DEP_JPEG_INCLUDE` env var.
 

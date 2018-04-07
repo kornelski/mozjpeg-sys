@@ -1,3 +1,5 @@
+//! Please **[read libjpeg manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt)** for description of functions in this crate.
+
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
