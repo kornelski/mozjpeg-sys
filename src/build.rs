@@ -215,14 +215,22 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<Path
         "vendor/simd/jidctint-sse2.asm", "vendor/simd/jidctred-sse2.asm", "vendor/simd/jquantf-sse2.asm",
         "vendor/simd/jquanti-sse2.asm",
     ];
+    let arm = [
+        "vendor/simd/jsimd_arm_neon.S",
+    ];
+    let aarch64 = [
+        "vendor/simd/jsimd_arm64_neon.S",
+    ];
 
-    let files: &[_] = if target_arch == "x86_64" {
-        n.define("__x86_64__", None);
-        &x86_64
-    } else if target_arch == "x86" {
-        &x86
-    } else {
-        panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");
+    let files: &[_] = match target_arch {
+        "x86_64" => {
+            n.define("__x86_64__", None);
+            &x86_64
+        },
+        "x86" => &x86,
+        "arm" => &arm,
+        "aarch64" => &aarch64,
+        _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
     };
 
     n.files(files);
