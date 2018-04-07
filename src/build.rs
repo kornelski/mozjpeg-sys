@@ -125,10 +125,19 @@ fn main() {
             let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
 
             match target_arch.as_str() {
-                "x86_64" => {c.file("vendor/simd/jsimd_x86_64.c");},
-                "x86" => {c.file("vendor/simd/jsimd_i386.c");},
+                "x86_64" => {
+                    c.flag_if_supported("-msse");
+                    c.file("vendor/simd/jsimd_x86_64.c");
+                },
+                "x86" => {
+                    c.flag_if_supported("-msse");
+                    c.file("vendor/simd/jsimd_i386.c");
+                },
                 "mips" => {c.file("vendor/simd/jsimd_mips.c");},
-                "powerpc" | "powerpc64" => {c.file("vendor/simd/jsimd_powerpc.c");},
+                "powerpc" | "powerpc64" => {
+                    c.flag_if_supported("-maltivec");
+                    c.file("vendor/simd/jsimd_powerpc.c");
+                },
                 "arm" => {c.file("vendor/simd/jsimd_arm.c");},
                 "aarch64" => {c.file("vendor/simd/jsimd_arm64.c");},
                 _ => {},
