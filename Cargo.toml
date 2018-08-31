@@ -11,7 +11,7 @@ homepage = "https://github.com/kornelski/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.5.13"
+version = "0.5.14"
 
 [badges]
 travis-ci = { repository = "kornelski/mozjpeg-sys" }
@@ -35,10 +35,12 @@ path = "examples/reencode.rs"
 libc = "0.2.31"
 
 [features]
+default = ["nasm_simd"]
+with_simd = [] # nasm is required for x86, but not ARM
+nasm_simd = ["with_simd", "nasm-rs", "nasm-rs/parallel"]
+
 arith_dec = []
 arith_enc = []
-default = ["nasm_simd"]
-nasm_simd = ["nasm-rs", "nasm-rs/parallel"]
 turbojpeg_api = []
 jpeg70_abi = ["arith_dec", "arith_enc"]
 jpeg80_abi = ["jpeg70_abi"]

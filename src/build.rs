@@ -9,8 +9,21 @@ use std::env;
 use std::process;
 use std::io::Write;
 
-fn main() {
+fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
     let mut c = cc::Build::new();
+    c.include(&config_dir);
+    c.include(&vendor);
+    c.pic(true);
+    c.warnings(false);
+
+    if let Ok(target_cpu) = env::var("TARGET_CPU") {
+        c.flag_if_supported(&format!("-march={}", target_cpu));
+    }
+
+    c
+}
+
+fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let config_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("include");
     let vendor = dunce::canonicalize(root.join("vendor")).unwrap();
@@ -18,17 +31,9 @@ fn main() {
     fs::create_dir_all(&config_dir).unwrap();
 
     println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).unwrap().to_str().unwrap());
-    c.include(&config_dir);
-    c.include(&vendor);
-    c.pic(true);
-
-    if let Ok(target_cpu) = env::var("TARGET_CPU") {
-        c.flag_if_supported(&format!("-march={}", target_cpu));
-    }
+    let mut c = compiler(&config_dir, &vendor);
 
     let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
-
-    c.warnings(false);
 
     let files = &[
         "vendor/jcapimin.c", "vendor/jcapistd.c", "vendor/jccoefct.c", "vendor/jccolor.c",
@@ -46,6 +51,7 @@ fn main() {
     ];
 
     for file in files.iter() {
+        assert!(Path::new(file).exists(), "C file is missing. Maybe you need to run `git submodule update --init`?");
         c.file(file);
     }
 
@@ -104,7 +110,6 @@ fn main() {
         c.file("vendor/jdarith.c");
     }
 
-
     if cfg!(feature = "arith_enc") || cfg!(feature = "arith_dec") {
         c.file("vendor/jaricom.c");
     }
@@ -116,16 +121,22 @@ fn main() {
         c.file("vendor/jdatasrc-tj.c");
     }
 
-    let with_nasm = cfg!(feature = "nasm_simd") && nasm_supported();
+    // cfg!(target_arch) doesn't work for cross-compiling.
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
 
-    #[cfg(feature = "nasm_simd")]
+    let nasm_needed_for_arch = match target_arch.as_str() {
+        "x86_64" | "x86" => true,
+        _ => false,
+    };
+
+    let with_simd = cfg!(feature = "with_simd") && (!nasm_needed_for_arch || nasm_supported());
+
+    #[cfg(feature = "with_simd")]
     {
-        if with_nasm {
+        if with_simd {
             c.include(vendor.join("simd"));
             jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
-            // cfg!(target_arch) doesn't work for cross-compiling.
-            let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
             let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
 
             match target_arch.as_str() {
@@ -146,14 +157,21 @@ fn main() {
                 "aarch64" => {c.file("vendor/simd/jsimd_arm64.c");},
                 _ => {},
             }
-            for obj in build_nasm(&vendor, &target_arch, &target_os) {
-                c.object(obj);
-            }
+            if nasm_needed_for_arch {
+                #[cfg(feature = "nasm_simd")]
+                {
+                    for obj in build_nasm(&vendor, &target_arch, &target_os) {
+                        c.object(obj);
+                    }
+                }
+            } else {
+                build_gas(compiler(&config_dir, &vendor), &target_arch, abi);
+            };
         }
     }
     drop(jconfig_h); // close the file
 
-    if !with_nasm {
+    if !with_simd {
         c.file("vendor/jsimd_none.c");
     }
 
@@ -161,21 +179,37 @@ fn main() {
 }
 
 fn nasm_supported() -> bool {
-    match process::Command::new("nasm").arg("-v").output() {
-        Err(e) => {
-            println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {}", e);
-            false
-        },
-        Ok(out) => {
-            let ver = String::from_utf8_lossy(&out.stdout);
-            if ver.contains("NASM version 0.") {
-                println!("cargo:warning=Installed NASM is outdated and useless. Mozjpeg's SIMD won't be enabled: {}", ver);
+    if cfg!(feature = "nasm_simd") {
+        match process::Command::new("nasm").arg("-v").output() {
+            Err(e) => {
+                println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {}", e);
                 false
-            } else {
-                true
+            },
+            Ok(out) => {
+                let ver = String::from_utf8_lossy(&out.stdout);
+                if ver.contains("NASM version 0.") {
+                    println!("cargo:warning=Installed NASM is outdated and useless. Mozjpeg's SIMD won't be enabled: {}", ver);
+                    false
+                } else {
+                    true
+                }
             }
         }
+    } else {
+        false
     }
+}
+
+#[cfg(feature = "with_simd")]
+fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
+    c.file(match target_arch {
+        "arm" => "vendor/simd/jsimd_arm_neon.S",
+        "aarch64" => "vendor/simd/jsimd_arm64_neon.S",
+        _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
+    });
+    c.flag("-xassembler-with-cpp");
+
+    c.compile(&format!("mozjpegsimd{}", abi));
 }
 
 #[cfg(feature = "nasm_simd")]
@@ -219,12 +253,6 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<Path
         "vendor/simd/jidctint-sse2.asm", "vendor/simd/jidctred-sse2.asm", "vendor/simd/jquantf-sse2.asm",
         "vendor/simd/jquanti-sse2.asm",
     ];
-    let arm = [
-        "vendor/simd/jsimd_arm_neon.S",
-    ];
-    let aarch64 = [
-        "vendor/simd/jsimd_arm64_neon.S",
-    ];
 
     let files: &[_] = match target_arch {
         "x86_64" => {
@@ -232,8 +260,6 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<Path
             &x86_64
         },
         "x86" => &x86,
-        "arm" => &arm,
-        "aarch64" => &aarch64,
         _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
     };
 
