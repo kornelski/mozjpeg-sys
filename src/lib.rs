@@ -822,7 +822,7 @@ extern "C" {
     pub fn jpeg_set_idct_method_selector(cinfo: &jpeg_compress_struct, param: *const c_void);
     #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
     #[cfg(test)] #[allow(dead_code)] fn jsimd_can_fdct_ifast() -> c_int;
-    #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast_sse2(block: *mut DCTELEM);
+    #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast(block: *mut DCTELEM);
 }
 
 #[test]
@@ -840,9 +840,13 @@ pub fn simd_is_detectable() {
 #[test]
 #[cfg(all(target_arch="x86_64", feature="nasm_simd"))]
 pub fn simd_works_sse2() {
+    #[repr(align(16))]
+    struct Aligned([DCTELEM; 64]);
+
     unsafe {
         assert!(jsimd_can_fdct_ifast() != 0);
-        jsimd_fdct_ifast_sse2([0 as DCTELEM; 64].as_mut_ptr());
+        let mut data = Aligned([0 as DCTELEM; 64]);
+        jsimd_fdct_ifast(data.0.as_mut_ptr());
     }
 }
 
