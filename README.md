@@ -1,21 +1,32 @@
 # Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](https://www.rust-lang.org/)
 
-See [crates.io](https://crates.io/crates/mozjpeg-sys).
-
-This crate exposes the raw libjpeg API, so [libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to wrap it in [a higher-level API](https://crates.io/crates/mozjpeg) :)
+This crate exposes the raw libjpeg API, so [the libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to use it via [a higher-level API instead](https://crates.rs/crates/mozjpeg) :)
 
 Many fields in structs are marked as private by default, but if you need to access them, make a pull request marking them `pub`.
 
 ## Requirements
 
-* nasm
 * build-essentials (gcc, etc.)
+* [nasm](https://www.nasm.us/) for Intel CPUs, `gas` for ARM. Note: Apple's Xcode ships an incredibly outdated version of nasm that won't work.
 
 ## Usage
 
-Add "[mozjpeg-sys](https://crates.io/crates/mozjpeg-sys)" as a dependency in `Cargo.toml` and use with `extern crate mozjpeg_sys`.
+In Rust/Cargo, add "[mozjpeg-sys][crate]" as a dependency in `Cargo.toml`.
 
-For non-Rust projects you can build the library using `cargo build --release`. It creates `target/release/libmozjpeg_sys.a` and `target/release/libmozjpeg_sys.{dll,so,dylib}`, which can be linked with C and other languages. In case you need the `jpeglib.h`header for C code built with Cargo, required include path**s** (use `env::split_paths()`) are set for Cargo [build scripts](http://doc.crates.io/environment-variables.html#environment-variables-cargo-sets-for-build-scripts) in the `DEP_JPEG_INCLUDE` env var.
+[crate]: https://crates.rs/crates/mozjpeg-sys
+
+In case you need the `jpeglib.h` header for C code built with Cargo, the required include path**s** (use [`env::split_paths()`][1]) are set for Cargo [build scripts][2] in the `DEP_JPEG_INCLUDE` env var.
+
+[1]: https://doc.rust-lang.org/std/env/fn.split_paths.html
+[2]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts
+
+For non-Rust projects you can build the library using [Cargo](https://rustup.rs/):
+
+```sh
+cargo build --release
+```
+
+It creates `target/release/libmozjpeg_sys.a` and `target/release/libmozjpeg_sys.{dll,so,dylib}`, which can be linked with C and other languages.
 
 By default `nasm_simd` feature is enabled, and this crate will try to compile SIMD support. Additionally, you can set `TARGET_CPU` environmental variable (equivalent to `-march=$TARGET_CPU`) to optimize all of C code for a specific CPU model.
 
