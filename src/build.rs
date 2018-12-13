@@ -25,8 +25,10 @@ fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
 
 fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
-    let config_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("include");
-    let vendor = dunce::canonicalize(root.join("vendor")).expect("missing vendor git submodule?");
+    let root = dunce::canonicalize(root).unwrap();
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let config_dir = out_dir.join("include");
+    let vendor = root.join("vendor");
 
     fs::create_dir_all(&config_dir).unwrap();
 
@@ -160,7 +162,7 @@ fn main() {
             if nasm_needed_for_arch {
                 #[cfg(feature = "nasm_simd")]
                 {
-                    for obj in build_nasm(&vendor, &target_arch, &target_os) {
+                    for obj in build_nasm(&root, &vendor, &out_dir, &target_arch, &target_os) {
                         c.object(obj);
                     }
                 }
@@ -214,8 +216,9 @@ fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
 }
 
 #[cfg(feature = "nasm_simd")]
-fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<PathBuf> {
+fn build_nasm(root: &Path, vendor_dir: &Path, out_dir: &Path, target_arch: &str, target_os: &str) -> Vec<PathBuf> {
     let mut n = nasm_rs::Build::new();
+    n.out_dir(out_dir);
 
     if std::env::var("PROFILE").ok().map_or(false, |s| "debug" == s) {
         n.debug(true);
@@ -255,7 +258,7 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<Path
         let included = path.extension().map_or(false, |e| e == "asm");
         let excluded = path.file_name().map_or(true, |f| dont_compile.iter().any(|&e| e == f));
         if included && !excluded {
-            n.file(path);
+            n.file(path.strip_prefix(root).unwrap_or(&path));
         }
     }
     n.compile_objects()
