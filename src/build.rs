@@ -24,9 +24,9 @@ fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
 }
 
 fn main() {
-    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
     let config_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("include");
-    let vendor = dunce::canonicalize(root.join("vendor")).unwrap();
+    let vendor = dunce::canonicalize(root.join("vendor")).expect("missing vendor git submodule?");
 
     fs::create_dir_all(&config_dir).unwrap();
 
@@ -142,19 +142,19 @@ fn main() {
             match target_arch.as_str() {
                 "x86_64" => {
                     c.flag_if_supported("-msse");
-                    c.file("vendor/simd/jsimd_x86_64.c");
+                    c.file("vendor/simd/x86_64/jsimd.c");
                 },
                 "x86" => {
                     c.flag_if_supported("-msse");
-                    c.file("vendor/simd/jsimd_i386.c");
+                    c.file("vendor/simd/i386/jsimd.c");
                 },
-                "mips" => {c.file("vendor/simd/jsimd_mips.c");},
+                "mips" => {c.file("vendor/simd/mips/jsimd.c");},
                 "powerpc" | "powerpc64" => {
                     c.flag_if_supported("-maltivec");
-                    c.file("vendor/simd/jsimd_powerpc.c");
+                    c.file("vendor/simd/powerpc/jsimd.c");
                 },
-                "arm" => {c.file("vendor/simd/jsimd_arm.c");},
-                "aarch64" => {c.file("vendor/simd/jsimd_arm64.c");},
+                "arm" => {c.file("vendor/simd/arm/jsimd.c");},
+                "aarch64" => {c.file("vendor/simd/arm64/jsimd.c");},
                 _ => {},
             }
             if nasm_needed_for_arch {
@@ -203,8 +203,9 @@ fn nasm_supported() -> bool {
 #[cfg(feature = "with_simd")]
 fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
     c.file(match target_arch {
-        "arm" => "vendor/simd/jsimd_arm_neon.S",
-        "aarch64" => "vendor/simd/jsimd_arm64_neon.S",
+        "arm" => "vendor/simd/arm/jsimd_neon.S",
+        "aarch64" => "vendor/simd/arm64/jsimd_neon.S",
+        "mips" => "vendor/simd/mips/jsimd_dspr2.S",
         _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
     });
     c.flag("-xassembler-with-cpp");
@@ -216,9 +217,7 @@ fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
 fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<PathBuf> {
     let mut n = nasm_rs::Build::new();
 
-    n.include(vendor_dir.join("simd"));
-    n.include(vendor_dir.join("win"));
-    if std::env::var("PROFILE").map(|s| "debug" == s).unwrap_or(false) {
+    if std::env::var("PROFILE").ok().map_or(false, |s| "debug" == s) {
         n.debug(true);
     }
 
@@ -231,38 +230,33 @@ fn build_nasm(vendor_dir: &Path, target_arch: &str, target_os: &str) -> Vec<Path
         _ => n.define("ELF", None),
     };
 
-    let x86_64 = [
-        "vendor/simd/jfdctflt-sse-64.asm", "vendor/simd/jccolor-sse2-64.asm", "vendor/simd/jcgray-sse2-64.asm",
-        "vendor/simd/jchuff-sse2-64.asm", "vendor/simd/jcsample-sse2-64.asm", "vendor/simd/jdcolor-sse2-64.asm",
-        "vendor/simd/jdmerge-sse2-64.asm", "vendor/simd/jdsample-sse2-64.asm", "vendor/simd/jfdctfst-sse2-64.asm",
-        "vendor/simd/jfdctint-sse2-64.asm", "vendor/simd/jidctflt-sse2-64.asm", "vendor/simd/jidctfst-sse2-64.asm",
-        "vendor/simd/jidctint-sse2-64.asm", "vendor/simd/jidctred-sse2-64.asm", "vendor/simd/jquantf-sse2-64.asm",
-        "vendor/simd/jquanti-sse2-64.asm",
-    ];
-    let x86 = [
-        "vendor/simd/jsimdcpu.asm", "vendor/simd/jfdctflt-3dn.asm", "vendor/simd/jidctflt-3dn.asm",
-        "vendor/simd/jquant-3dn.asm", "vendor/simd/jccolor-mmx.asm", "vendor/simd/jcgray-mmx.asm",
-        "vendor/simd/jcsample-mmx.asm", "vendor/simd/jdcolor-mmx.asm", "vendor/simd/jdmerge-mmx.asm",
-        "vendor/simd/jdsample-mmx.asm", "vendor/simd/jfdctfst-mmx.asm", "vendor/simd/jfdctint-mmx.asm",
-        "vendor/simd/jidctfst-mmx.asm", "vendor/simd/jidctint-mmx.asm", "vendor/simd/jidctred-mmx.asm",
-        "vendor/simd/jquant-mmx.asm", "vendor/simd/jfdctflt-sse.asm", "vendor/simd/jidctflt-sse.asm",
-        "vendor/simd/jquant-sse.asm", "vendor/simd/jccolor-sse2.asm", "vendor/simd/jcgray-sse2.asm",
-        "vendor/simd/jchuff-sse2.asm", "vendor/simd/jcsample-sse2.asm", "vendor/simd/jdcolor-sse2.asm",
-        "vendor/simd/jdmerge-sse2.asm", "vendor/simd/jdsample-sse2.asm", "vendor/simd/jfdctfst-sse2.asm",
-        "vendor/simd/jfdctint-sse2.asm", "vendor/simd/jidctflt-sse2.asm", "vendor/simd/jidctfst-sse2.asm",
-        "vendor/simd/jidctint-sse2.asm", "vendor/simd/jidctred-sse2.asm", "vendor/simd/jquantf-sse2.asm",
-        "vendor/simd/jquanti-sse2.asm",
-    ];
-
-    let files: &[_] = match target_arch {
+    let arch_name = match target_arch {
+        "x86" => "i386",
         "x86_64" => {
             n.define("__x86_64__", None);
-            &x86_64
+            "x86_64"
         },
-        "x86" => &x86,
         _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
     };
 
-    n.files(files);
+    // these should have had .inc extension
+    let dont_compile = ["jccolext-avx2.asm", "jccolext-mmx.asm", "jccolext-sse2.asm", "jcgryext-avx2.asm",
+        "jcgryext-mmx.asm", "jcgryext-sse2.asm", "jdcolext-avx2.asm", "jdcolext-mmx.asm",
+        "jdcolext-sse2.asm", "jdmrgext-avx2.asm", "jdmrgext-mmx.asm", "jdmrgext-sse2.asm"];
+
+    let simd_dir = vendor_dir.join("simd");
+    let simd_arch_dir = simd_dir.join(arch_name);
+    n.include(&simd_arch_dir);
+    n.include(simd_dir.join("nasm"));
+    n.include(vendor_dir.join("win"));
+    for entry in fs::read_dir(simd_arch_dir).expect("simd subdir missing") {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        let included = path.extension().map_or(false, |e| e == "asm");
+        let excluded = path.file_name().map_or(true, |f| dont_compile.iter().any(|&e| e == f));
+        if included && !excluded {
+            n.file(path);
+        }
+    }
     n.compile_objects()
 }
