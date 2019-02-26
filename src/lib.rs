@@ -600,11 +600,11 @@ pub struct jpeg_decompress_struct {
 /// Error handler object
 pub struct jpeg_error_mgr {
     /// Error exit handler: does not return to caller
-    pub error_exit: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
-    pub emit_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, msg_level: c_int)>,
-    pub output_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
-    pub format_message: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[u8; 80usize])>,
-    pub reset_error_mgr: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub error_exit: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub emit_message: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct, msg_level: c_int)>,
+    pub output_message: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub format_message: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct, buffer: &[u8; 80usize])>,
+    pub reset_error_mgr: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub msg_code: c_int,
     pub msg_parm: msg_parm_union,
     pub trace_level: c_int,
@@ -634,7 +634,7 @@ impl Default for msg_parm_union {
 
 #[repr(C)]
 pub struct jpeg_progress_mgr {
-    pub progress_monitor: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub progress_monitor: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub pass_counter: c_long,
     pub pass_limit: c_long,
     pub completed_passes: c_int,
@@ -645,26 +645,26 @@ pub struct jpeg_progress_mgr {
 pub struct jpeg_destination_mgr {
     pub next_output_byte: *mut u8,
     pub free_in_buffer: usize,
-    pub init_destination: Option<extern "C" fn(cinfo: &mut jpeg_compress_struct)>,
-    pub empty_output_buffer: Option<extern "C" fn(cinfo: &mut jpeg_compress_struct)
+    pub init_destination: Option<unsafe extern "C" fn(cinfo: &mut jpeg_compress_struct)>,
+    pub empty_output_buffer: Option<unsafe extern "C" fn(cinfo: &mut jpeg_compress_struct)
                                                        -> boolean>,
-    pub term_destination: Option<extern "C" fn(cinfo: &mut jpeg_compress_struct)>,
+    pub term_destination: Option<unsafe extern "C" fn(cinfo: &mut jpeg_compress_struct)>,
 }
 
 #[repr(C)]
 pub struct jpeg_source_mgr {
     pub next_input_byte: *const u8,
     pub bytes_in_buffer: usize,
-    pub init_source: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
-    pub fill_input_buffer: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct)
+    pub init_source: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
+    pub fill_input_buffer: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct)
                                                      -> boolean>,
-    pub skip_input_data: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct,
+    pub skip_input_data: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct,
                                                     num_bytes:
                                                         c_long)>,
-    pub resync_to_restart: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct,
+    pub resync_to_restart: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct,
                                                       desired: c_int)
                                                      -> boolean>,
-    pub term_source: Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
+    pub term_source: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
 }
 
 pub enum jvirt_sarray_control {}
@@ -672,27 +672,27 @@ pub enum jvirt_barray_control {}
 
 #[repr(C)]
 pub struct jpeg_memory_mgr {
-    pub alloc_small: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub alloc_small: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                 pool_id: c_int,
                                                 sizeofobject: usize) -> *mut c_void>,
-    pub alloc_large: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub alloc_large: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                 pool_id: c_int,
                                                 sizeofobject: usize) -> *mut c_void>,
-    pub alloc_sarray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub alloc_sarray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                  pool_id: c_int,
                                                  samplesperrow: JDIMENSION,
                                                  numrows: JDIMENSION) -> JSAMPARRAY_MUT>,
-    pub alloc_barray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub alloc_barray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                  pool_id: c_int,
                                                  blocksperrow: JDIMENSION,
                                                  numrows: JDIMENSION) -> JBLOCKARRAY>,
-    pub request_virt_sarray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub request_virt_sarray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                         pool_id: c_int,
                                                         pre_zero: boolean,
                                                         samplesperrow: JDIMENSION,
                                                         numrows: JDIMENSION,
                                                         maxaccess: JDIMENSION) -> *mut jvirt_sarray_control>,
-    pub request_virt_barray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub request_virt_barray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                         pool_id:
                                                             c_int,
                                                         pre_zero: boolean,
@@ -700,24 +700,24 @@ pub struct jpeg_memory_mgr {
                                                             JDIMENSION,
                                                         numrows: JDIMENSION,
                                                         maxaccess: JDIMENSION) -> *mut jvirt_barray_control>,
-    pub realize_virt_arrays: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
-    pub access_virt_sarray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub realize_virt_arrays: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub access_virt_sarray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                        ptr: *mut jvirt_sarray_control,
                                                        start_row: JDIMENSION,
                                                        num_rows: JDIMENSION,
                                                        writable: boolean) -> JSAMPARRAY_MUT>,
-    pub access_virt_barray: Option<extern "C" fn(cinfo: &mut jpeg_common_struct,
+    pub access_virt_barray: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct,
                                                        ptr: *mut jvirt_barray_control,
                                                        start_row: JDIMENSION,
                                                        num_rows: JDIMENSION,
                                                        writable: boolean) -> JBLOCKARRAY>,
-    pub free_pool: Option<extern "C" fn(cinfo: &mut jpeg_common_struct, pool_id: c_int)>,
-    pub self_destruct: Option<extern "C" fn(cinfo: &mut jpeg_common_struct)>,
+    pub free_pool: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct, pool_id: c_int)>,
+    pub self_destruct: Option<unsafe extern "C" fn(cinfo: &mut jpeg_common_struct)>,
     pub max_memory_to_use: c_long,
     pub max_alloc_chunk: c_long,
 }
 
-pub type jpeg_marker_parser_method = Option<extern "C" fn(cinfo: &mut jpeg_decompress_struct) -> boolean>;
+pub type jpeg_marker_parser_method = Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct) -> boolean>;
 
 pub unsafe fn jpeg_create_decompress(dinfo: *mut jpeg_decompress_struct) {
     jpeg_CreateDecompress(dinfo, JPEG_LIB_VERSION, mem::size_of::<jpeg_decompress_struct>());
