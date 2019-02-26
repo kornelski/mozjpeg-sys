@@ -1,5 +1,5 @@
-extern crate mozjpeg_sys;
-extern crate libc;
+
+use libc;
 use mozjpeg_sys::*;
 use std::mem;
 use std::ffi::CString;

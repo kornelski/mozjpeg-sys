@@ -12,6 +12,7 @@ license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
 version = "0.10.0"
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "kornelski/mozjpeg-sys" }
@@ -21,18 +22,18 @@ dunce = "0.1.1"
 
 [build-dependencies.cc]
 features = ["parallel"]
-version = "1.0.26"
+version = "1.0.29"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.1.3"
+version = "0.1.4"
 
 [[example]]
 name = "reencode"
 path = "examples/reencode.rs"
 
 [dependencies]
-libc = "0.2.45"
+libc = "0.2.49"
 
 [features]
 default = ["nasm_simd"]

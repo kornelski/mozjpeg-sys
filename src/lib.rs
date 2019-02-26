@@ -4,9 +4,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
-extern crate libc;
-
-pub use self::libc::FILE;
+pub use libc::FILE;
 pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
 use std::mem;
 use std::default::Default;

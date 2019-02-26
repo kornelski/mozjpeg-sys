@@ -1,7 +1,3 @@
-extern crate dunce;
-extern crate cc;
-#[cfg(feature = "nasm_simd")]
-extern crate nasm_rs;
 #[allow(unused_imports)]
 use std::path::{Path, PathBuf};
 use std::fs;
