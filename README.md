@@ -9,6 +9,8 @@ Many fields in structs are marked as private by default, but if you need to acce
 * build-essentials (gcc, etc.)
 * [nasm](https://www.nasm.us/) for Intel CPUs, `gas` for ARM. Note: Apple's Xcode ships an incredibly outdated version of nasm that won't work.
 
+This crate supports x86, x86-64 and ARM64.
+
 ## Usage
 
 In Rust/Cargo, add "[mozjpeg-sys][crate]" as a dependency in `Cargo.toml`.
