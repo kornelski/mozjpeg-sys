@@ -11,7 +11,7 @@ homepage = "https://github.com/kornelski/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.10.0"
+version = "0.10.1"
 edition = "2018"
 
 [badges]
@@ -39,7 +39,7 @@ libc = "0.2.49"
 default = ["nasm_simd"]
 with_simd = [] # nasm is required for x86, but not ARM
 nasm_simd = ["with_simd", "nasm-rs", "nasm-rs/parallel"]
-
+unwinding = []
 arith_dec = []
 arith_enc = []
 turbojpeg_api = []

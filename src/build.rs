@@ -16,6 +16,10 @@ fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
         c.flag_if_supported(&format!("-march={}", target_cpu));
     }
 
+    if cfg!(feature = "unwinding") {
+        c.flag_if_supported("-fexceptions");
+    }
+
     c
 }
 
