@@ -25,17 +25,17 @@ fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
 
 fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
-    let root = dunce::canonicalize(root).unwrap();
-    let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let root = dunce::canonicalize(root).expect("root dir");
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("outdir"));
     let config_dir = out_dir.join("include");
     let vendor = root.join("vendor");
 
-    fs::create_dir_all(&config_dir).unwrap();
+    let _ = fs::create_dir_all(&config_dir);
 
-    println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).unwrap().to_str().unwrap());
+    println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
     let mut c = compiler(&config_dir, &vendor);
 
-    let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap();
+    let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").expect("target");
 
     let files = &[
         "vendor/jcapimin.c", "vendor/jcapistd.c", "vendor/jccoefct.c", "vendor/jccolor.c",
@@ -66,7 +66,7 @@ fn main() {
     };
     println!("cargo:lib_version={}", abi);
 
-    let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).unwrap();
+    let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).expect("jconfint");
     write!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
         #ifndef INLINE
@@ -83,13 +83,13 @@ fn main() {
         #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
         "#,
         timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
-        PACKAGE_NAME = env::var("CARGO_PKG_NAME").unwrap(),
-        VERSION = env::var("CARGO_PKG_VERSION").unwrap(),
+        PACKAGE_NAME = env::var("CARGO_PKG_NAME").expect("pkg"),
+        VERSION = env::var("CARGO_PKG_VERSION").expect("pkg"),
         SIZEOF_SIZE_T = if target_pointer_width == "32" {4} else {8}
-    ).unwrap();
+    ).expect("write");
     drop(jconfigint_h); // close the file
 
-    let mut jconfig_h = fs::File::create(config_dir.join("jconfig.h")).unwrap();
+    let mut jconfig_h = fs::File::create(config_dir.join("jconfig.h")).expect("jconf");
     write!(jconfig_h, r#"
         #define JPEG_LIB_VERSION {JPEG_LIB_VERSION}
         #define LIBJPEG_TURBO_VERSION 0
@@ -101,14 +101,14 @@ fn main() {
         #define MEM_SRCDST_SUPPORTED 1
         "#,
         JPEG_LIB_VERSION = abi
-    ).unwrap();
+    ).expect("write");
 
     if cfg!(feature = "arith_enc") {
-        jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").unwrap();
+        jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").expect("write");
         c.file("vendor/jcarith.c");
     }
     if cfg!(feature = "arith_dec") {
-        jconfig_h.write_all(b"#define D_ARITH_CODING_SUPPORTED 1\n").unwrap();
+        jconfig_h.write_all(b"#define D_ARITH_CODING_SUPPORTED 1\n").expect("write");
         c.file("vendor/jdarith.c");
     }
 
@@ -124,7 +124,7 @@ fn main() {
     }
 
     // cfg!(target_arch) doesn't work for cross-compiling.
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
 
     let nasm_needed_for_arch = match target_arch.as_str() {
         "x86_64" | "x86" => true,
