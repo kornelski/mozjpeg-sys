@@ -178,6 +178,8 @@ fn main() {
     }
 
     c.compile(&format!("mozjpeg{}", abi));
+
+    generate_ffi_mod();
 }
 
 fn nasm_supported() -> bool {
@@ -262,4 +264,65 @@ fn build_nasm(root: &Path, vendor_dir: &Path, out_dir: &Path, target_arch: &str,
         }
     }
     n.compile_objects()
+}
+
+fn generate_ffi_mod() {
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("outdir"));
+    let src_dir = env::current_dir().expect("failed to get current directory");
+
+    eprintln!("OUT_DIR={}", out_dir.display());
+    eprintln!("SRC_DIR={}", src_dir.display());
+    let ffi_input = src_dir.join("src").join("lib.rs");
+    println!("{}", format!("cargo:rerun-if-changed={}", ffi_input.display()));
+
+    let mut cfg = ffi_wrapper_nounwind::Builder::new("mozjpeg", &ffi_input);
+    cfg.header("jinclude.h")
+        .header("jpeglib.h")
+        .header("jconfig.h")
+        .header("jconfigint.h")
+        .skip_fn(|s| {
+            match s {
+                // FIXME: the Rust API of this function does not match
+                // their C API, so the auto-generated wrappers fail
+                // fail to compile in C. The fix would be to get the
+                // crate to pass, e.g., the `ctest` tests first.
+                | "jpeg_std_error"
+                | "jpeg_float_add_quant_table"
+                | "jpeg_calc_jpeg_dimensions"
+                | "jsimd_fdct_ifast"
+                | "jsimd_can_rgb_ycc"
+                | "jsimd_can_fdct_ifast"
+                | "jpeg_set_idct_method_selector"
+                | "jpeg_read_scanlines"
+                | "jpeg_has_multiple_scans"
+                | "jpeg_input_complete"
+                | "jpeg_c_bool_param_supported"
+                | "jpeg_c_float_param_supported"
+                | "jpeg_c_get_float_param"
+                | "jpeg_c_int_param_supported"
+                | "jpeg_c_get_int_param"
+                | "jpeg_c_get_bool_param"
+                | "jpeg_copy_critical_parameters"
+                | "jpeg_read_raw_data"
+                  => true,
+                _ => false,
+            }
+        });
+
+    let output = cfg.generate();
+    let rust_out = out_dir.join("ffi.rs");
+    let cxx_out = out_dir.join("mozjpeg_cxx_wrapper.cpp");
+    std::fs::write(&rust_out, output.rust).unwrap();
+    std::fs::write(&cxx_out, output.cxx).unwrap();
+    drop(std::process::Command::new("rustfmt").arg(&rust_out).status());
+
+    let mozjpeg_include = src_dir.join("vendor");
+    let config_dir = out_dir.join("include");
+    cc::Build::new()
+        .file(cxx_out)
+        .flag("-Wno-return-type-c-linkage")
+        .include(mozjpeg_include)
+        .include(config_dir)
+        .cpp(true)
+        .compile("mozjpeg_cxx_wrapper");
 }

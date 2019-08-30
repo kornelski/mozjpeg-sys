@@ -19,6 +19,7 @@ travis-ci = { repository = "kornelski/mozjpeg-sys" }
 
 [build-dependencies]
 dunce = "1.0.0"
+ffi_wrapper_nounwind = "0.1.1"
 
 [build-dependencies.cc]
 features = ["parallel"]

@@ -725,6 +725,8 @@ pub unsafe fn jpeg_create_compress(cinfo: *mut jpeg_compress_struct) {
     jpeg_CreateCompress(cinfo, JPEG_LIB_VERSION, mem::size_of::<jpeg_compress_struct>());
 }
 
+mod raw_wrappers {
+use super::*;
 extern "C" {
     pub fn jpeg_std_error<'a>(err: &'a mut jpeg_error_mgr) -> &'a mut jpeg_error_mgr;
     pub fn jpeg_CreateCompress(cinfo: *mut jpeg_compress_struct, version: c_int, structsize: usize);
@@ -818,10 +820,43 @@ extern "C" {
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
     pub fn jpeg_set_idct_method_selector(cinfo: &jpeg_compress_struct, param: *const c_void);
-    #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
-    #[cfg(test)] #[allow(dead_code)] fn jsimd_can_fdct_ifast() -> c_int;
-    #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast(block: *mut DCTELEM);
+    #[cfg(test)] pub(crate) fn jsimd_can_rgb_ycc() -> c_int;
+    #[cfg(test)] #[allow(dead_code)] pub(crate) fn jsimd_can_fdct_ifast() -> c_int;
+    #[cfg(test)] #[allow(dead_code)] pub(crate) fn jsimd_fdct_ifast(block: *mut DCTELEM);
 }
+}
+
+include!(concat!(env!("OUT_DIR"), "/ffi.rs"));
+
+// FIXME: the Rust API of this function does not match
+// their C API, so the auto-generated wrappers fail
+// fail to compile in C. The fix would be to get the
+// crate to pass, e.g., the `ctest` tests first.
+pub use raw_wrappers::{
+    jpeg_std_error,
+    jpeg_float_add_quant_table,
+    jpeg_set_idct_method_selector,
+    jpeg_read_scanlines,
+    jpeg_has_multiple_scans,
+    jpeg_input_complete,
+    jpeg_c_bool_param_supported,
+    jpeg_c_float_param_supported,
+    jpeg_c_get_float_param,
+    jpeg_c_int_param_supported,
+    jpeg_c_get_int_param,
+    jpeg_c_get_bool_param,
+    jpeg_copy_critical_parameters,
+    jpeg_read_raw_data,
+};
+#[cfg(feature = "jpeg70_abi")]
+pub use raw_wrappers::jpeg_calc_jpeg_dimensions;
+#[cfg(test)]
+use raw_wrappers::{
+    jsimd_can_rgb_ycc,
+    jsimd_fdct_ifast,
+    jsimd_can_fdct_ifast,
+};
+
 
 #[test]
 pub fn enum_32bit() {
@@ -867,7 +902,7 @@ pub fn try_compress() {
         jpeg_std_error(&mut err);
         let mut cinfo: jpeg_compress_struct = mem::zeroed();
         cinfo.common.err = &mut err;
-        if 0 == jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_TRELLIS_QUANT) {
+        if 0 == jpeg_c_bool_param_supported(&mut cinfo, JBOOLEAN_TRELLIS_QUANT) {
             panic!("Not linked to mozjpeg?");
         }
         jpeg_create_compress(&mut cinfo);
