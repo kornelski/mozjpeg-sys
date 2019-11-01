@@ -9,6 +9,9 @@ pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
 use std::mem;
 use std::default::Default;
 
+#[cfg(feature = "turbojpeg_api")]
+include!("turbojpeg.rs");
+
 pub use J_COLOR_SPACE::*;
 pub use J_BOOLEAN_PARAM::*;
 pub use J_FLOAT_PARAM::*;
