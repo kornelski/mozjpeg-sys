@@ -11,7 +11,7 @@ homepage = "https://github.com/kornelski/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.10.3"
+version = "0.10.4"
 edition = "2018"
 
 [badges]
@@ -22,18 +22,18 @@ dunce = "1.0.0"
 
 [build-dependencies.cc]
 features = ["parallel"]
-version = "1.0.29"
+version = "1.0.50"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.1.4"
+version = "0.1.7"
 
 [[example]]
 name = "reencode"
 path = "examples/reencode.rs"
 
 [dependencies]
-libc = "0.2.49"
+libc = "0.2.68"
 
 [features]
 default = ["nasm_simd"]
