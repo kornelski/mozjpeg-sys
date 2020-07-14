@@ -4,10 +4,11 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
-pub use libc::FILE;
 pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
 use std::mem;
 use std::default::Default;
+#[cfg(not(target_arch = "wasm32"))]
+pub use libc::FILE;
 
 pub use J_COLOR_SPACE::*;
 pub use J_BOOLEAN_PARAM::*;

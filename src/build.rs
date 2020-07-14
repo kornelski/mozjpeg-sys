@@ -131,7 +131,7 @@ fn main() {
         _ => false,
     };
 
-    let with_simd = cfg!(feature = "with_simd") && (!nasm_needed_for_arch || nasm_supported());
+    let with_simd = cfg!(feature = "with_simd") && target_arch != "wasm32" && (!nasm_needed_for_arch || nasm_supported());
 
     #[cfg(feature = "with_simd")]
     {
@@ -208,7 +208,9 @@ fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
         "arm" => "vendor/simd/arm/jsimd_neon.S",
         "aarch64" => "vendor/simd/arm64/jsimd_neon.S",
         "mips" => "vendor/simd/mips/jsimd_dspr2.S",
-        _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
+        _ => {
+            panic!("\"with_simd\" feature flag has been enabled in mozjpeg-sys crate on {} platform, which is does not have SIMD acceleration in MozJPEG. Disable SIMD or compile for x86/ARM/MIPS.", target_arch);
+        },
     });
     c.flag("-xassembler-with-cpp");
 

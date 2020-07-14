@@ -11,7 +11,7 @@ homepage = "https://github.com/kornelski/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.10.5"
+version = "0.10.6"
 edition = "2018"
 
 [badges]
