@@ -30,6 +30,12 @@ fn main() {
     let config_dir = out_dir.join("include");
     let vendor = root.join("vendor");
 
+    // cc crate needs emscripten target to use correct `ar`
+    if env::var("TARGET").map_or(false, |t| t == "wasm32-unknown-unknown") {
+        println!("cargo:warning=If the build fails, try using wasm32-unknown-emscripten target instead");
+        eprintln!("If the build fails, try using wasm32-unknown-emscripten target instead");
+    }
+
     let _ = fs::create_dir_all(&config_dir);
 
     println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
