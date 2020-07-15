@@ -7,8 +7,11 @@
 pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
 use std::mem;
 use std::default::Default;
+
 #[cfg(not(target_arch = "wasm32"))]
 pub use libc::FILE;
+#[cfg(target_arch = "wasm32")]
+pub use std::os::raw::c_void as FILE;
 
 pub use J_COLOR_SPACE::*;
 pub use J_BOOLEAN_PARAM::*;
@@ -732,7 +735,9 @@ extern "C" {
     pub fn jpeg_CreateDecompress(cinfo: *mut jpeg_decompress_struct, version: c_int, structsize: usize);
     pub fn jpeg_destroy_compress(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_destroy_decompress(cinfo: &mut jpeg_decompress_struct);
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn jpeg_stdio_dest(cinfo: &mut jpeg_compress_struct, outfile: *mut FILE);
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn jpeg_stdio_src(cinfo: &mut jpeg_decompress_struct, infile: *mut FILE);
     pub fn jpeg_mem_dest(cinfo: &mut jpeg_compress_struct,
                      outbuffer: *mut *mut u8,
