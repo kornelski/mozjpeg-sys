@@ -669,8 +669,17 @@ pub struct jpeg_source_mgr {
     pub term_source: Option<unsafe extern "C" fn(cinfo: &mut jpeg_decompress_struct)>,
 }
 
-pub enum jvirt_sarray_control {}
-pub enum jvirt_barray_control {}
+/// This is an opaque type. Don't assume size or alignment of this struct.
+#[repr(C)]
+pub struct jvirt_sarray_control {
+    _priv: c_long,
+}
+
+/// This is an opaque type. Don't assume size or alignment of this struct.
+#[repr(C)]
+pub struct jvirt_barray_control {
+    _priv: c_long,
+}
 
 #[repr(C)]
 pub struct jpeg_memory_mgr {

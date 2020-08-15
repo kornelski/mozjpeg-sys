@@ -1,17 +1,17 @@
 [package]
 name = "mozjpeg-sys"
-description = "FFI bindings for MozJPEG v3.3.1.\n\nMozJPEG is automatically built and linked statically. Requires nasm and a C compiler."
+description = "FFI bindings for MozJPEG v4.\n\nMozJPEG is automatically built and linked statically. Requires nasm and a C compiler."
 categories = [ "external-ffi-bindings", "multimedia::images" ]
-authors = ["Kornel <pornel@pornel.net>"]
+authors = ["Kornel <kornel@geekhood.net>"]
 include = ["/src/*.rs", "/vendor/*.c", "/vendor/*.h", "/vendor/simd/**", "/Cargo.toml", "/README.md"]
 keywords = ["JPEG", "mozjpeg", "libjpeg", "static"]
 readme = "README.md"
 repository = "https://github.com/kornelski/mozjpeg-sys.git"
-homepage = "https://github.com/kornelski/mozjpeg-sys"
+homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.10.9"
+version = "0.10.10"
 edition = "2018"
 
 [badges]
@@ -49,3 +49,6 @@ jpeg80_abi = ["jpeg70_abi"]
 [lib]
 name = "mozjpeg_sys"
 crate-type = ["staticlib", "lib"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
