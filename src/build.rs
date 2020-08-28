@@ -269,5 +269,5 @@ fn build_nasm(root: &Path, vendor_dir: &Path, out_dir: &Path, target_arch: &str,
             n.file(path.strip_prefix(root).unwrap_or(&path));
         }
     }
-    n.compile_objects()
+    n.compile_objects().expect("NASM build failed")
 }
