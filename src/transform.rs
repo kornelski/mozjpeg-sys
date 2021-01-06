@@ -76,6 +76,7 @@ extern "C" {
 }
 
 #[test]
+#[cfg(all(target_pointer_width="64", feature="jpegtran"))]
 fn bindgen_test_layout_jpeg_transform_info() {
     assert_eq!(
         ::std::mem::size_of::<jpeg_transform_info>(),
