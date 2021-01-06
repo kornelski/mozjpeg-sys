@@ -66,6 +66,8 @@ pub type DCTELEM = i16;
 #[cfg(not(feature = "nasm_simd"))]
 pub type DCTELEM = c_int;
 
+#[cfg(feature = "jpegtran")]
+include!("transform.rs");
 
 #[repr(C)]
 pub struct JQUANT_TBL {

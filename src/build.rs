@@ -122,9 +122,12 @@ fn main() {
         c.file("vendor/jaricom.c");
     }
 
+    if cfg!(feature = "jpegtran") {
+        c.file("vendor/transupp.c");
+    }
+
     if cfg!(feature = "turbojpeg_api") {
         c.file("vendor/turbojpeg.c");
-        c.file("vendor/transupp.c");
         c.file("vendor/jdatadst-tj.c");
         c.file("vendor/jdatasrc-tj.c");
     }
