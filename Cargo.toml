@@ -51,5 +51,8 @@ jpeg80_abi = ["jpeg70_abi"]
 name = "mozjpeg_sys"
 crate-type = ["staticlib", "lib"]
 
+[dev-dependencies]
+cloudflare-soos = "2.0.0"
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
