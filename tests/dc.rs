@@ -4,6 +4,18 @@ use cloudflare_soos::jpeg::*;
 use mozjpeg_sys::*;
 use std::mem;
 
+fn decode_rgb_data(data: &[u8]) -> (Vec<u8>, u32, u32) {
+    unsafe {
+        let mut err: jpeg_error_mgr = mem::zeroed();
+        let mut cinfo: jpeg_decompress_struct = mem::zeroed();
+        cinfo.common.err = jpeg_std_error(&mut err);
+        jpeg_create_decompress(&mut cinfo);
+
+        jpeg_mem_src(&mut cinfo, data.as_ptr(), data.len() as _);
+        decode_rgb_cinfo(&mut cinfo)
+    }
+}
+
 fn decode_rgb_file(file_name: &str) -> (Vec<u8>, u32, u32) {
     unsafe {
         let mut err: jpeg_error_mgr = mem::zeroed();
@@ -95,4 +107,88 @@ fn no_green_faces() {
         .unwrap();
     assert_eq!(3, f.component_indices.len());
     assert_eq!(3, f.dc_table_indices.len());
+}
+
+
+#[test]
+fn roundtrip() {
+    let decoded = decode_rgb_data(&std::fs::read("tests/test.jpg").unwrap());
+    let enc = encode_subsampled_jpeg(decoded);
+    let _ = decode_rgb_data(&enc);
+}
+
+fn encode_subsampled_jpeg((data, width, height): (Vec<u8>, u32, u32)) -> Vec<u8> {
+    unsafe {
+        let mut cinfo: jpeg_compress_struct = mem::zeroed();
+        let mut err = mem::zeroed();
+        cinfo.common.err = jpeg_std_error(&mut err);
+
+        let s = mem::size_of_val(&cinfo) as usize;
+        jpeg_CreateCompress(&mut cinfo, JPEG_LIB_VERSION, s);
+
+        cinfo.in_color_space = JCS_RGB;
+        cinfo.input_components = 3 as c_int;
+        jpeg_set_defaults(&mut cinfo);
+
+        let mut outsize = 0;
+        let mut outbuffer = std::ptr::null_mut();
+        jpeg_mem_dest(&mut cinfo, &mut outbuffer, &mut outsize);
+
+        cinfo.image_width = width as JDIMENSION;
+        cinfo.image_height = height as JDIMENSION;
+
+        jpeg_set_colorspace(&mut cinfo, JCS_YCbCr);
+
+        let (h, v) = (2, 2);
+        (*cinfo.comp_info.add(0)).h_samp_factor = 1;
+        (*cinfo.comp_info.add(0)).v_samp_factor = 1;
+        (*cinfo.comp_info.add(1)).h_samp_factor = h;
+        (*cinfo.comp_info.add(1)).v_samp_factor = v;
+        (*cinfo.comp_info.add(2)).h_samp_factor = h;
+        (*cinfo.comp_info.add(2)).v_samp_factor = v;
+
+        jpeg_start_compress(&mut cinfo, true as boolean);
+        let _ = write_scanlines(&mut cinfo, &data);
+        jpeg_finish_compress(&mut cinfo);
+
+        std::slice::from_raw_parts(outbuffer, outsize as _).to_vec()
+    }
+}
+
+
+/// Returns true if all lines in image_src (not necessarily all lines of the image) were written
+pub fn write_scanlines(cinfo: &mut jpeg_compress_struct, image_src: &[u8]) -> bool {
+    const MAX_MCU_HEIGHT: usize = 16;
+
+    assert_eq!(0, cinfo.raw_data_in);
+    assert!(cinfo.input_components > 0);
+    assert!(cinfo.image_width > 0);
+
+    let byte_width = cinfo.image_width as usize * cinfo.input_components as usize;
+    for rows in image_src.chunks(MAX_MCU_HEIGHT * byte_width) {
+        let mut row_pointers = arrayvec::ArrayVec::<[_; MAX_MCU_HEIGHT]>::new();
+        for row in rows.chunks(byte_width) {
+            debug_assert!(row.len() == byte_width);
+            row_pointers.push(row.as_ptr());
+        }
+
+        let mut rows_left = row_pointers.len() as u32;
+        let mut row_pointers = row_pointers.as_ptr();
+        while rows_left > 0 {
+            unsafe {
+                let rows_written = jpeg_write_scanlines(
+                    cinfo,
+                    row_pointers,
+                    rows_left,
+                );
+                debug_assert!(rows_left >= rows_written);
+                if rows_written == 0 {
+                    return false;
+                }
+                rows_left -= rows_written;
+                row_pointers = row_pointers.add(rows_written as usize);
+            }
+        }
+    }
+    true
 }
