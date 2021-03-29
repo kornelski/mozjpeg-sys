@@ -166,7 +166,7 @@ pub fn write_scanlines(cinfo: &mut jpeg_compress_struct, image_src: &[u8]) -> bo
 
     let byte_width = cinfo.image_width as usize * cinfo.input_components as usize;
     for rows in image_src.chunks(MAX_MCU_HEIGHT * byte_width) {
-        let mut row_pointers = arrayvec::ArrayVec::<[_; MAX_MCU_HEIGHT]>::new();
+        let mut row_pointers = arrayvec::ArrayVec::<_, MAX_MCU_HEIGHT>::new();
         for row in rows.chunks(byte_width) {
             debug_assert!(row.len() == byte_width);
             row_pointers.push(row.as_ptr());
