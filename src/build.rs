@@ -136,10 +136,7 @@ fn main() {
     // cfg!(target_arch) doesn't work for cross-compiling.
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
 
-    let nasm_needed_for_arch = match target_arch.as_str() {
-        "x86_64" | "x86" => true,
-        _ => false,
-    };
+    let nasm_needed_for_arch = target_arch == "x86_64" || target_arch == "x86";
 
     let with_simd = cfg!(feature = "with_simd") && target_arch != "wasm32" && (!nasm_needed_for_arch || nasm_supported());
 
@@ -165,8 +162,8 @@ fn main() {
                     c.flag_if_supported("-maltivec");
                     c.file("vendor/simd/powerpc/jsimd.c");
                 },
-                "arm" => {c.file("vendor/simd/arm/jsimd.c");},
-                "aarch64" => {c.file("vendor/simd/arm64/jsimd.c");},
+                "arm" => {c.file("vendor/simd/arm/aarch32/jsimd.c");},
+                "aarch64" => {c.file("vendor/simd/arm/aarch64/jsimd.c");},
                 _ => {},
             }
             if nasm_needed_for_arch {
@@ -215,8 +212,8 @@ fn nasm_supported() -> bool {
 #[cfg(feature = "with_simd")]
 fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
     c.file(match target_arch {
-        "arm" => "vendor/simd/arm/jsimd_neon.S",
-        "aarch64" => "vendor/simd/arm64/jsimd_neon.S",
+        "arm" => "vendor/simd/arm/aarch32/jsimd_neon.S",
+        "aarch64" => "vendor/simd/arm/aarch64/jsimd_neon.S",
         "mips" => "vendor/simd/mips/jsimd_dspr2.S",
         _ => {
             panic!("\"with_simd\" feature flag has been enabled in mozjpeg-sys crate on {} platform, which is does not have SIMD acceleration in MozJPEG. Disable SIMD or compile for x86/ARM/MIPS.", target_arch);
