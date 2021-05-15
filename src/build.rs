@@ -36,6 +36,12 @@ fn main() {
         eprintln!("If the build fails, try using wasm32-unknown-emscripten target instead");
     }
 
+    // ASM reported to crash on Apple M1
+    let may_be_apple_silicon_m1 = env::var("TARGET").map_or(false, |t| t.starts_with("aarch64-apple-"));
+    if may_be_apple_silicon_m1 {
+        println!("cargo:warning=Disabling SIMD in mozjpeg-sys, because Apple M1 may be incompatible");
+    }
+
     let _ = fs::create_dir_all(&config_dir);
 
     println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
@@ -138,7 +144,10 @@ fn main() {
 
     let nasm_needed_for_arch = target_arch == "x86_64" || target_arch == "x86";
 
-    let with_simd = cfg!(feature = "with_simd") && target_arch != "wasm32" && (!nasm_needed_for_arch || nasm_supported());
+    let with_simd = cfg!(feature = "with_simd")
+        && target_arch != "wasm32" // no WASM-SIMD support here
+        && (!nasm_needed_for_arch || nasm_supported())
+        && !may_be_apple_silicon_m1;
 
     #[cfg(feature = "with_simd")]
     {
