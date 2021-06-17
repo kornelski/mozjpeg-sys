@@ -11,7 +11,7 @@ homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "0.12.4"
+version = "0.12.5"
 edition = "2018"
 
 [badges]
