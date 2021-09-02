@@ -36,9 +36,10 @@ path = "examples/reencode.rs"
 libc = "0.2.98"
 
 [features]
-default = ["nasm_simd"]
+default = ["nasm_simd_parallel_build"]
 with_simd = [] # nasm is required for x86, but not ARM
-nasm_simd = ["with_simd", "nasm-rs", "nasm-rs/parallel"]
+nasm_simd = ["with_simd", "nasm-rs"]
+nasm_simd_parallel_build = ["nasm_simd", "nasm-rs/parallel"]
 unwinding = []
 arith_dec = []
 arith_enc = []
