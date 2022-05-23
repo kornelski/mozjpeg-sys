@@ -78,6 +78,14 @@ fn main() {
     };
     println!("cargo:lib_version={}", abi);
 
+    let pkg_version = env::var("CARGO_PKG_VERSION").expect("pkg");
+
+    fs::write(config_dir.join("jversion.h"), format!("
+        #define JVERSION \"{pkg_version}\"
+        #define JCOPYRIGHT \"Copyright (C)  The libjpeg-turbo Project, Mozilla, and many others\"
+        #define JCOPYRIGHT_SHORT JCOPYRIGHT
+    ", pkg_version = pkg_version)).expect("jversion");
+
     let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).expect("jconfint");
     write!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
@@ -90,13 +98,14 @@ fn main() {
                 #define INLINE inline
             #endif
         #endif
+        #define FALLTHROUGH
         #define PACKAGE_NAME "{PACKAGE_NAME}"
         #define VERSION "{VERSION}"
         #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
         "#,
         timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
         PACKAGE_NAME = env::var("CARGO_PKG_NAME").expect("pkg"),
-        VERSION = env::var("CARGO_PKG_VERSION").expect("pkg"),
+        VERSION = pkg_version,
         SIZEOF_SIZE_T = if target_pointer_width == "32" {4} else {8}
     ).expect("write");
     drop(jconfigint_h); // close the file
@@ -108,6 +117,7 @@ fn main() {
         #define BITS_IN_JSAMPLE 8
         #define STDC_HEADERS 1
         #define NO_GETENV 1
+        #define NO_PUTENV 1
         #define HAVE_STDLIB_H 1
         #define HAVE_UNSIGNED_CHAR 1
         #define HAVE_UNSIGNED_SHORT 1

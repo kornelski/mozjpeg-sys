@@ -11,7 +11,7 @@ homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2018"
 
 [badges]
@@ -22,18 +22,18 @@ dunce = "1.0.2"
 
 [build-dependencies.cc]
 features = ["parallel"]
-version = "1.0.69"
+version = "1.0.73"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.2.0"
+version = "0.2.4"
 
 [[example]]
 name = "reencode"
 path = "examples/reencode.rs"
 
 [dependencies]
-libc = "0.2.98"
+libc = "0.2.126"
 
 [features]
 default = ["nasm_simd_parallel_build"]
@@ -53,8 +53,8 @@ name = "mozjpeg_sys"
 crate-type = ["staticlib", "lib"]
 
 [dev-dependencies]
-cloudflare-soos = "2.0.0"
-arrayvec = "0.7.1"
+cloudflare-soos = "2.1.0"
+arrayvec = "0.7.2"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
