@@ -11,11 +11,8 @@ homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG"
 build = "src/build.rs"
 links = "jpeg"
-version = "1.0.2"
-edition = "2018"
-
-[badges]
-travis-ci = { repository = "kornelski/mozjpeg-sys" }
+version = "1.0.3"
+edition = "2021"
 
 [build-dependencies]
 dunce = "1.0.2"
