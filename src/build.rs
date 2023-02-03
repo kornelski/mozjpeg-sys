@@ -153,6 +153,7 @@ fn main() {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
 
     let nasm_needed_for_arch = target_arch == "x86_64" || target_arch == "x86";
+    let asm_used_for_arch = nasm_needed_for_arch || matches!(target_arch.as_str(), "arm" | "aarch64" | "mips");
 
     let with_simd = cfg!(feature = "with_simd")
         && target_arch != "wasm32" // no WASM-SIMD support here
@@ -189,6 +190,7 @@ fn main() {
 
             if target_arch == "arm" || target_arch == "aarch64" {
                 c.include(simd_dir.join("arm"));
+                c.flag_if_supported("-mfpu=neon");
                 c.file("vendor/simd/arm/jcgray-neon.c");
                 c.file("vendor/simd/arm/jcphuff-neon.c");
                 c.file("vendor/simd/arm/jcsample-neon.c");
@@ -225,17 +227,19 @@ fn main() {
                 },
                 _ => {},
             }
-            if nasm_needed_for_arch {
-                #[cfg(feature = "nasm_simd")]
-                {
-                    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-                    for obj in build_nasm(&root, &vendor, &out_dir, &target_arch, &target_os) {
-                        c.object(obj);
+            if asm_used_for_arch {
+                if nasm_needed_for_arch {
+                    #[cfg(feature = "nasm_simd")]
+                    {
+                        let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+                        for obj in build_nasm(&root, &vendor, &out_dir, &target_arch, &target_os) {
+                            c.object(obj);
+                        }
                     }
-                }
-            } else {
-                build_gas(compiler(&config_dir, &vendor), &target_arch, abi);
-            };
+                } else {
+                    build_gas(compiler(&config_dir, &vendor), &target_arch, abi);
+                };
+            }
         }
     }
     drop(jconfig_h); // close the file
@@ -308,7 +312,7 @@ fn build_nasm(root: &Path, vendor_dir: &Path, out_dir: &Path, target_arch: &str,
             n.define("__x86_64__", None);
             "x86_64"
         },
-        _ => {panic!("The mozjpeg-sys SIMD build script is incomplete for this platform");},
+        _ => panic!("Bug: mozjpeg-sys build script is broken on {target_arch}"),
     };
 
     // these should have had .inc extension
