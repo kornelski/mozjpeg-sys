@@ -11,7 +11,7 @@ homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "1.0.5"
+version = "1.0.6"
 edition = "2021"
 
 [build-dependencies]
