@@ -126,6 +126,13 @@ fn main() {
         JPEG_LIB_VERSION = abi
     ).expect("write");
 
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+    if target_os == "windows" {
+        writeln!(jconfig_h, "#define THREAD_LOCAL __declspec(thread)").unwrap();
+    } else {
+        writeln!(jconfig_h, "#define THREAD_LOCAL __thread").unwrap();
+    }
+
     if cfg!(feature = "arith_enc") {
         jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").expect("write");
         c.file("vendor/jcarith.c");
