@@ -13,6 +13,9 @@ pub use libc::FILE;
 #[cfg(target_arch = "wasm32")]
 pub use std::os::raw::c_void as FILE;
 
+mod jerror;
+pub use jerror::*;
+
 pub use J_COLOR_SPACE::*;
 pub use J_BOOLEAN_PARAM::*;
 pub use J_FLOAT_PARAM::*;
