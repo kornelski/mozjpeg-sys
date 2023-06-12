@@ -16,15 +16,15 @@ edition = "2021"
 rust-version = "1.60"
 
 [build-dependencies]
-dunce = "1.0.2"
+dunce = "1.0.4"
 
 [build-dependencies.cc]
 features = ["parallel"]
-version = "1.0.73"
+version = "1.0.79"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.2.4"
+version = "0.2.5"
 
 [[example]]
 name = "reencode"
