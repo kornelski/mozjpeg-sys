@@ -11,16 +11,15 @@ homepage = "https://lib.rs/mozjpeg-sys"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "1.1.1"
+version = "2.0.0"
 edition = "2021"
-rust-version = "1.60"
+rust-version = "1.71"
 
 [build-dependencies]
 dunce = "1.0.4"
 
 [build-dependencies.cc]
-features = ["parallel"]
-version = "1.0.79"
+version = "1.0.81"
 
 [build-dependencies.nasm-rs]
 optional = true
@@ -34,16 +33,27 @@ path = "examples/reencode.rs"
 libc = "0.2.126"
 
 [features]
-default = ["nasm_simd_parallel_build"]
-with_simd = [] # nasm is required for x86, but not ARM
+default = ["parallel", "unwinding", "with_simd"]
+# Use SIMD-optimized assembly
+with_simd = []
+# May compile native dependencies quicker
+parallel = ["cc/parallel", "nasm-rs?/parallel"]
+# `nasm` is required for x86, but not ARM
 nasm_simd = ["with_simd", "dep:nasm-rs"]
-nasm_simd_parallel_build = ["nasm_simd", "nasm-rs?/parallel"]
+nasm_simd_parallel_build = ["nasm_simd", "parallel"]
+# Allow libjpeg error handlers to panic
 unwinding = []
+# Enable reading of JPEGs using arithmetic coding (these are rare)
 arith_dec = []
+# Enable creation of JPEGs using arithmetic coding (problematic compatibility)
 arith_enc = []
+# Enable alternative simpler C API
 turbojpeg_api = ["jpegtran"]
+# Include code for `jpegtran`
 jpegtran = []
+# Try to be binary-compatible with libjpeg v7 fork
 jpeg70_abi = ["arith_dec", "arith_enc"]
+# Try to be binary-compatible with libjpeg v8 fork
 jpeg80_abi = ["jpeg70_abi"]
 
 [lib]
@@ -51,8 +61,9 @@ name = "mozjpeg_sys"
 crate-type = ["staticlib", "lib"]
 
 [dev-dependencies]
-cloudflare-soos = "2.1.0"
-arrayvec = "0.7.2"
+cloudflare-soos = "2.2.0"
+arrayvec = "0.7.4"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
+rustdoc-args = ["--generate-link-to-definition"]

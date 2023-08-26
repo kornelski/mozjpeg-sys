@@ -154,7 +154,6 @@ fn main() {
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
 
     let nasm_needed_for_arch = target_arch == "x86_64" || target_arch == "x86";
-    let asm_used_for_arch = nasm_needed_for_arch || matches!(target_arch.as_str(), "arm" | "aarch64" | "mips");
 
     let with_simd = cfg!(feature = "with_simd")
         && target_arch != "wasm32" // no WASM-SIMD support here
@@ -162,6 +161,7 @@ fn main() {
 
     #[cfg(feature = "with_simd")]
     {
+        let asm_used_for_arch = nasm_needed_for_arch || matches!(target_arch.as_str(), "arm" | "aarch64" | "mips");
         if with_simd {
             let simd_dir = vendor.join("simd");
             c.include(&simd_dir);

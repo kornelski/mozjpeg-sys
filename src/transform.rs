@@ -54,7 +54,7 @@ pub unsafe fn jtransform_execute_transformation(
     jtransform_execute_transform(srcinfo, dstinfo, src_coef_arrays, info)
 }
 
-extern "C" {
+extern "C-unwind" {
     pub fn jtransform_adjust_parameters(
         srcinfo: j_decompress_ptr,
         dstinfo: j_compress_ptr,
