@@ -4,6 +4,7 @@ use std::fs;
 use std::env;
 use std::process;
 use std::io::Write;
+use std::str::FromStr;
 
 fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
     let mut c = cc::Build::new();
@@ -80,6 +81,12 @@ fn main() {
         #define JCOPYRIGHT_SHORT JCOPYRIGHT
     ", pkg_version = pkg_version)).expect("jversion");
 
+    let timestamp: u64 = if let Ok(epoch) = env::var("SOURCE_DATE_EPOCH") {
+        u64::from_str(epoch.as_str()).expect("Invalid SOURCE_DATE_EPOCH environment variable")
+    } else {
+        std::time::UNIX_EPOCH.elapsed().unwrap().as_secs()
+    };
+
     let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).expect("jconfint");
     write!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
@@ -97,7 +104,7 @@ fn main() {
         #define VERSION "{VERSION}"
         #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
         "#,
-        timestamp = std::time::UNIX_EPOCH.elapsed().unwrap().as_secs(),
+        timestamp = timestamp,
         PACKAGE_NAME = env::var("CARGO_PKG_NAME").expect("pkg"),
         VERSION = pkg_version,
         SIZEOF_SIZE_T = if target_pointer_width == "32" {4} else {8}
