@@ -38,6 +38,10 @@ fn main() {
         eprintln!("If the build fails, try using wasm32-unknown-emscripten target instead");
     }
 
+    if cfg!(feature = "unwinding") && env::var_os("CARGO_CFG_PANIC").as_deref() == Some("abort".as_ref()) {
+        println!("cargo:warning=libjpeg will not be able to gracefully handle errors when used with panic=abort");
+    }
+
     let _ = fs::create_dir_all(&config_dir);
 
     println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
