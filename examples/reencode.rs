@@ -1,5 +1,10 @@
+//! All of this can be done easier and better with the higher-level wrapper:
+//!
+//! https://lib.rs/crates/mozjpeg
+//!
+//! Don't forget to build it with `--release` flag, otherwise it will be unoptimized
+//! and noticeably slow.
 
-use libc;
 use mozjpeg_sys::*;
 use std::mem;
 use std::ffi::CString;
@@ -19,9 +24,11 @@ unsafe fn decode(file_name: &str) -> (Vec<u8>, u32, u32) {
     cinfo.common.err = jpeg_std_error(&mut err);
     jpeg_create_decompress(&mut cinfo);
 
-    let file_name = CString::new(file_name.as_bytes()).unwrap();
-    let mode = CString::new("rb").unwrap();
-    let fh = libc::fopen(file_name.as_ptr(), mode.as_ptr());
+    let c_file_name = CString::new(file_name.as_bytes()).unwrap();
+    let fh = libc::fopen(c_file_name.as_ptr(), b"rb\0".as_ptr().cast());
+    if fh.is_null() {
+        panic!("Can't open {file_name}");
+    }
     jpeg_stdio_src(&mut cinfo, fh);
     jpeg_read_header(&mut cinfo, true as boolean);
 
@@ -51,11 +58,14 @@ unsafe fn decode(file_name: &str) -> (Vec<u8>, u32, u32) {
 }
 
 unsafe fn encode(buffer: &[u8], width: u32, height: u32) {
-    println!("Writing example_result.jpg");
+    let file_name = "example_result.jpg";
+    println!("Writing {file_name}");
     let quality = 98;
-    let file_name = CString::new("example_result.jpg").unwrap();
-    let mode = CString::new("wb").unwrap();
-    let fh = libc::fopen(file_name.as_ptr(), mode.as_ptr());
+    let c_file_name = CString::new(file_name).unwrap();
+    let fh = libc::fopen(c_file_name.as_ptr(), b"wb\0".as_ptr().cast());
+    if fh.is_null() {
+        panic!("Can't write {file_name}");
+    }
 
     let mut err = mem::zeroed();
     let mut cinfo: jpeg_compress_struct = mem::zeroed();
