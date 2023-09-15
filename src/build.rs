@@ -30,6 +30,7 @@ fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("outdir"));
     let config_dir = out_dir.join("include");
     let vendor = root.join("vendor");
+    println!("cargo:rerun-if-changed={}", vendor.display());
 
     // cc crate needs emscripten target to use correct `ar`
     if env::var("TARGET").map_or(false, |t| t == "wasm32-unknown-unknown") {
@@ -81,6 +82,7 @@ fn main() {
         #define JCOPYRIGHT_SHORT JCOPYRIGHT
     ", pkg_version = pkg_version)).expect("jversion");
 
+    println!("cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH");
     let timestamp: u64 = if let Ok(epoch) = env::var("SOURCE_DATE_EPOCH") {
         u64::from_str(epoch.as_str()).expect("Invalid SOURCE_DATE_EPOCH environment variable")
     } else {
