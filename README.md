@@ -1,6 +1,6 @@
 # Low-level [MozJPEG](https://github.com/mozilla/mozjpeg) bindings for [Rust](https://www.rust-lang.org/)
 
-This crate exposes the raw libjpeg API, so [the libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to use it via [a higher-level API instead](https://crates.rs/crates/mozjpeg) :)
+This crate exposes the raw libjpeg API, so [the libjpeg usage manual](https://github.com/mozilla/mozjpeg/blob/master/libjpeg.txt) applies. You'll most likely want to use it via [a higher-level API instead](https://lib.rs/crates/mozjpeg) :)
 
 Many fields in structs are marked as private by default, but if you need to access them, make a pull request marking them `pub`.
 
@@ -15,7 +15,7 @@ This crate supports x86, x86-64 and ARM64.
 
 In Rust/Cargo, add "[mozjpeg-sys][crate]" as a dependency in `Cargo.toml`.
 
-[crate]: https://crates.rs/crates/mozjpeg-sys
+[crate]: https://lib.rs/crates/mozjpeg-sys
 
 In case you need the `jpeglib.h` header for C code built with Cargo, the required include path**s** (use [`env::split_paths()`][1]) are set for Cargo [build scripts][2] in the `DEP_JPEG_INCLUDE` env var.
 

@@ -7,11 +7,12 @@ include = ["/src/*.rs", "/vendor/*.c", "LICENSE", "/vendor/*.h", "/vendor/simd/*
 keywords = ["JPEG", "mozjpeg", "libjpeg", "static"]
 readme = "README.md"
 repository = "https://github.com/kornelski/mozjpeg-sys.git"
-homepage = "https://lib.rs/mozjpeg-sys"
+homepage = "https://lib.rs/crates/mozjpeg-sys"
+documentation = "https://github.com/mozilla/mozjpeg#readme"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "2.0.2"
+version = "2.0.3"
 edition = "2021"
 rust-version = "1.71"
 
