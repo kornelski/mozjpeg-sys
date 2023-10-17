@@ -94,7 +94,7 @@ fn main() {
     };
 
     let mut jconfigint_h = fs::File::create(config_dir.join("jconfigint.h")).expect("jconfint");
-    write!(jconfigint_h, r#"
+    writeln!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
         #ifndef INLINE
             #if defined(__GNUC__)
@@ -118,7 +118,7 @@ fn main() {
     drop(jconfigint_h); // close the file
 
     let mut jconfig_h = fs::File::create(config_dir.join("jconfig.h")).expect("jconf");
-    write!(jconfig_h, r#"
+    writeln!(jconfig_h, r#"
         #define JPEG_LIB_VERSION {JPEG_LIB_VERSION}
         #define LIBJPEG_TURBO_VERSION 0
         #define BITS_IN_JSAMPLE 8
@@ -134,11 +134,19 @@ fn main() {
     ).expect("write");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    if target_os == "windows" {
-        writeln!(jconfig_h, "#define THREAD_LOCAL __declspec(thread)").unwrap();
+    let thread_local_define = if target_os == "windows" {
+        "#define THREAD_LOCAL __declspec(thread)"
     } else {
-        writeln!(jconfig_h, "#define THREAD_LOCAL __thread").unwrap();
-    }
+        if target_os == "ios" {
+            if env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
+                // thread-local storage is not supported on iOS 9
+                env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
+            }
+        }
+        // Try _Thread_local if __thread doesn't compile
+        "#define THREAD_LOCAL __thread"
+    };
+    writeln!(jconfig_h, "{}", thread_local_define).unwrap();
 
     if cfg!(feature = "arith_enc") {
         jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").expect("write");
