@@ -12,7 +12,7 @@ documentation = "https://github.com/mozilla/mozjpeg#readme"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "2.0.4"
+version = "2.0.5"
 edition = "2021"
 rust-version = "1.71"
 
@@ -34,14 +34,14 @@ path = "examples/reencode.rs"
 libc = "0.2.126"
 
 [features]
-default = ["parallel", "unwinding", "with_simd"]
-# Use SIMD-optimized assembly
-with_simd = []
+# If compiling for non-Intel platforms and `nasm` causes you grief, disable default features and use `with_simd` instead.
+default = ["parallel", "unwinding", "nasm_simd"]
 # May compile native dependencies quicker
 parallel = ["cc/parallel", "nasm-rs?/parallel"]
+# Use SIMD-optimized assembly on ARM and other non-Intel platforms.
+with_simd = []
 # `nasm` is required for x86, but not ARM
 nasm_simd = ["with_simd", "dep:nasm-rs"]
-nasm_simd_parallel_build = ["nasm_simd", "parallel"]
 # Allow libjpeg error handlers to panic
 unwinding = []
 # Enable reading of JPEGs using arithmetic coding (these are rare)
@@ -56,6 +56,8 @@ jpegtran = []
 jpeg70_abi = ["arith_dec", "arith_enc"]
 # Try to be binary-compatible with libjpeg v8 fork
 jpeg80_abi = ["jpeg70_abi"]
+# Obsolete. Just use `nasm_simd,parallel`
+nasm_simd_parallel_build = ["nasm_simd", "parallel"]
 
 [lib]
 name = "mozjpeg_sys"
