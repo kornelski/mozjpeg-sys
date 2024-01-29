@@ -24,7 +24,7 @@ version = "1.0.81"
 
 [build-dependencies.nasm-rs]
 optional = true
-version = "0.2.5"
+version = "0.3.0"
 
 [[example]]
 name = "reencode"
