@@ -1,20 +1,20 @@
+use std::env;
+use std::fs;
+use std::io::Write;
 #[allow(unused_imports)]
 use std::path::{Path, PathBuf};
-use std::fs;
-use std::env;
 use std::process;
-use std::io::Write;
 use std::str::FromStr;
 
 fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
     let mut c = cc::Build::new();
-    c.include(&config_dir);
-    c.include(&vendor);
+    c.include(config_dir);
+    c.include(vendor);
     c.pic(true);
     c.warnings(false);
 
     if let Ok(target_cpu) = env::var("TARGET_CPU") {
-        c.flag_if_supported(&format!("-march={}", target_cpu));
+        c.flag_if_supported(&format!("-march={target_cpu}"));
     }
 
     if cfg!(feature = "unwinding") {
@@ -44,7 +44,7 @@ fn main() {
 
     let _ = fs::create_dir_all(&config_dir);
 
-    println!("cargo:include={}", env::join_paths(&[&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
+    println!("cargo:include={}", env::join_paths([&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
     let mut c = compiler(&config_dir, &vendor);
 
     let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").expect("target");
@@ -64,7 +64,7 @@ fn main() {
         "vendor/jquant1.c", "vendor/jquant2.c", "vendor/jutils.c",
     ];
 
-    for file in files.iter() {
+    for file in files {
         assert!(Path::new(file).exists(), "C file is missing. Maybe you need to run `git submodule update --init`?");
         c.file(file);
     }
@@ -76,7 +76,7 @@ fn main() {
     } else {
         "62"
     };
-    println!("cargo:lib_version={}", abi);
+    println!("cargo:lib_version={abi}");
 
     let pkg_version = env::var("CARGO_PKG_VERSION").expect("pkg");
 
@@ -84,7 +84,7 @@ fn main() {
         #define JVERSION \"{pkg_version}\"
         #define JCOPYRIGHT \"Copyright (C)  The libjpeg-turbo Project, Mozilla, and many others\"
         #define JCOPYRIGHT_SHORT JCOPYRIGHT
-    ", pkg_version = pkg_version)).expect("jversion");
+    ")).expect("jversion");
 
     println!("cargo:rerun-if-env-changed=SOURCE_DATE_EPOCH");
     let timestamp: u64 = if let Ok(epoch) = env::var("SOURCE_DATE_EPOCH") {
@@ -119,7 +119,7 @@ fn main() {
 
     let mut jconfig_h = fs::File::create(config_dir.join("jconfig.h")).expect("jconf");
     writeln!(jconfig_h, r#"
-        #define JPEG_LIB_VERSION {JPEG_LIB_VERSION}
+        #define JPEG_LIB_VERSION {abi}
         #define LIBJPEG_TURBO_VERSION 0
         #define BITS_IN_JSAMPLE 8
         #define STDC_HEADERS 1
@@ -129,24 +129,21 @@ fn main() {
         #define HAVE_UNSIGNED_CHAR 1
         #define HAVE_UNSIGNED_SHORT 1
         #define MEM_SRCDST_SUPPORTED 1
-        "#,
-        JPEG_LIB_VERSION = abi
+        "#
     ).expect("write");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let thread_local_define = if target_os == "windows" {
         "#define THREAD_LOCAL __declspec(thread)"
     } else {
-        if target_os == "ios" {
-            if env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
-                // thread-local storage is not supported on iOS 9
-                env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
-            }
+        if target_os == "ios" && env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
+            // thread-local storage is not supported on iOS 9
+            env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
         }
         // Try _Thread_local if __thread doesn't compile
         "#define THREAD_LOCAL __thread"
     };
-    writeln!(jconfig_h, "{}", thread_local_define).unwrap();
+    writeln!(jconfig_h, "{thread_local_define}").unwrap();
 
     if cfg!(feature = "arith_enc") {
         jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").expect("write");
@@ -269,20 +266,20 @@ fn main() {
         c.file("vendor/jsimd_none.c");
     }
 
-    c.compile(&format!("mozjpeg{}", abi));
+    c.compile(&format!("mozjpeg{abi}"));
 }
 
 fn nasm_supported() -> bool {
     if cfg!(feature = "nasm_simd") {
         match process::Command::new("nasm").arg("-v").output() {
             Err(e) => {
-                println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {}", e);
+                println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {e}");
                 false
             },
             Ok(out) => {
                 let ver = String::from_utf8_lossy(&out.stdout);
                 if ver.contains("NASM version 0.") {
-                    println!("cargo:warning=Installed NASM is outdated and useless. Mozjpeg's SIMD won't be enabled: {}", ver);
+                    println!("cargo:warning=Installed NASM is outdated and useless. Mozjpeg's SIMD won't be enabled: {ver}");
                     false
                 } else {
                     true
@@ -301,12 +298,12 @@ fn build_gas(mut c: cc::Build, target_arch: &str, abi: &str) {
         "aarch64" => "vendor/simd/arm/aarch64/jsimd_neon.S",
         "mips" => "vendor/simd/mips/jsimd_dspr2.S",
         _ => {
-            panic!("\"with_simd\" feature flag has been enabled in mozjpeg-sys crate on {} platform, which is does not have SIMD acceleration in MozJPEG. Disable SIMD or compile for x86/ARM/MIPS.", target_arch);
+            panic!("\"with_simd\" feature flag has been enabled in mozjpeg-sys crate on {target_arch} platform, which is does not have SIMD acceleration in MozJPEG. Disable SIMD or compile for x86/ARM/MIPS.");
         },
     });
     c.flag("-xassembler-with-cpp");
 
-    c.compile(&format!("mozjpegsimd{}", abi));
+    c.compile(&format!("mozjpegsimd{abi}"));
 }
 
 #[cfg(feature = "nasm_simd")]
@@ -323,7 +320,7 @@ fn build_nasm(root: &Path, vendor_dir: &Path, out_dir: &Path, target_arch: &str,
     match (target_os, target_arch.ends_with("64")) {
         ("windows", false) => n.define("WIN32", None),
         ("windows", true) => n.define("WIN64", None),
-        ("macos", _) | ("ios", _) => n.define("MACHO", None),
+        ("macos" | "ios", _) => n.define("MACHO", None),
         _ => n.define("ELF", None),
     };
 

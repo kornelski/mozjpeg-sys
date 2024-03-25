@@ -6,11 +6,11 @@
 //! and noticeably slow.
 
 use mozjpeg_sys::*;
-use std::mem;
 use std::ffi::CString;
+use std::mem;
 
 fn main() {
-    let file_name = std::env::args().skip(1).next().expect("Specify a JPEG image path");
+    let file_name = std::env::args().nth(1).expect("Specify a JPEG image path");
 
     unsafe {
         let (buffer, width, height) = decode(&file_name);
@@ -34,7 +34,7 @@ unsafe fn decode(file_name: &str) -> (Vec<u8>, u32, u32) {
 
     let width = cinfo.image_width;
     let height = cinfo.image_height;
-    println!("Image size {}x{}", width, height);
+    println!("Image size {width}x{height}");
 
     cinfo.out_color_space = J_COLOR_SPACE::JCS_RGB;
     jpeg_start_decompress(&mut cinfo);

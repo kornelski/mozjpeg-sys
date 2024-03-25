@@ -4,9 +4,8 @@
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 
-pub use std::os::raw::{c_int, c_uint, c_void, c_long, c_ulong};
 use std::mem;
-use std::default::Default;
+pub use std::os::raw::{c_int, c_long, c_uint, c_ulong, c_void};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use libc::FILE;
@@ -16,13 +15,13 @@ pub use std::os::raw::c_void as FILE;
 mod jerror;
 pub use jerror::*;
 
-pub use J_COLOR_SPACE::*;
+pub use JINT_COMPRESS_PROFILE_VALUE::*;
 pub use J_BOOLEAN_PARAM::*;
+pub use J_COLOR_SPACE::*;
+pub use J_DCT_METHOD::JDCT_IFAST as JDCT_FASTEST;
+pub use J_DCT_METHOD::JDCT_ISLOW as JDCT_DEFAULT;
 pub use J_FLOAT_PARAM::*;
 pub use J_INT_PARAM::*;
-pub use JINT_COMPRESS_PROFILE_VALUE::*;
-pub use J_DCT_METHOD::JDCT_ISLOW as JDCT_DEFAULT;
-pub use J_DCT_METHOD::JDCT_IFAST as JDCT_FASTEST;
 
 #[cfg(feature = "jpeg80_abi")]
 pub const JPEG_LIB_VERSION: c_int = 80;
@@ -34,14 +33,14 @@ pub const JPEG_LIB_VERSION: c_int = 62;
 /// The basic DCT block is 8x8 samples
 pub const DCTSIZE: usize = 8;
 /// DCTSIZE²
-pub const DCTSIZE2: usize = DCTSIZE*DCTSIZE;
+pub const DCTSIZE2: usize = DCTSIZE * DCTSIZE;
 
 /// lasts until master record is destroyed
 pub const JPOOL_PERMANENT: c_int = 0;
 /// lasts until done with image/datastream
-pub const JPOOL_IMAGE: c_int     = 1;
+pub const JPOOL_IMAGE: c_int = 1;
 /// Quantization tables are numbered 0..3
-pub const NUM_QUANT_TBLS: usize  = 4;
+pub const NUM_QUANT_TBLS: usize = 4;
 
 pub type boolean = c_int;
 pub type JSAMPLE = u8;
@@ -177,7 +176,7 @@ pub enum J_COLOR_SPACE {
     JCS_UNKNOWN,
     /// monochrome
     JCS_GRAYSCALE,
-    /// red/green/blue as specified by the RGB_RED, RGB_GREEN, RGB_BLUE, and RGB_PIXELSIZE macros
+    /// red/green/blue as specified by the `RGB_RED`, `RGB_GREEN`, `RGB_BLUE`, and `RGB_PIXELSIZE` macros
     JCS_RGB,
     /// Y/Cb/Cr (also known as YUV)
     JCS_YCbCr,
@@ -188,8 +187,8 @@ pub enum J_COLOR_SPACE {
     /// red/green/blue
     JCS_EXT_RGB,
     /// red/green/blue/x
-    /// When out_color_space it set to JCS_EXT_RGBX, JCS_EXT_BGRX, JCS_EXT_XBGR,
-    /// or JCS_EXT_XRGB during decompression, the X byte is undefined, and in
+    /// When `out_color_space` it set to `JCS_EXT_RGBX`, `JCS_EXT_BGRX`, `JCS_EXT_XBGR`,
+    /// or `JCS_EXT_XRGB` during decompression, the X byte is undefined, and in
     /// order to ensure the best performance, libjpeg-turbo can set that byte to
     /// whatever value it wishes.
     JCS_EXT_RGBX,
@@ -263,35 +262,35 @@ pub enum J_BOOLEAN_PARAM {
 pub enum J_FLOAT_PARAM {
     JFLOAT_LAMBDA_LOG_SCALE1 = 0x5B61A599,
     JFLOAT_LAMBDA_LOG_SCALE2 = 0xB9BBAE03,
-    JFLOAT_TRELLIS_DELTA_DC_WEIGHT = 0x13775453
+    JFLOAT_TRELLIS_DELTA_DC_WEIGHT = 0x13775453,
 }
 
 #[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum J_INT_PARAM {
-  /// compression profile
-  JINT_COMPRESS_PROFILE = 0xE9918625,
-  /// splitting point for frequency in trellis quantization
-  JINT_TRELLIS_FREQ_SPLIT = 0x6FAFF127,
-  /// number of trellis loops
-  JINT_TRELLIS_NUM_LOOPS = 0xB63EBF39,
-  /// base quantization table index
-  JINT_BASE_QUANT_TBL_IDX = 0x44492AB1,
-  /// DC scan optimization mode
-  JINT_DC_SCAN_OPT_MODE = 0x0BE7AD3C
+    /// compression profile
+    JINT_COMPRESS_PROFILE = 0xE9918625,
+    /// splitting point for frequency in trellis quantization
+    JINT_TRELLIS_FREQ_SPLIT = 0x6FAFF127,
+    /// number of trellis loops
+    JINT_TRELLIS_NUM_LOOPS = 0xB63EBF39,
+    /// base quantization table index
+    JINT_BASE_QUANT_TBL_IDX = 0x44492AB1,
+    /// DC scan optimization mode
+    JINT_DC_SCAN_OPT_MODE = 0x0BE7AD3C,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum JINT_COMPRESS_PROFILE_VALUE {
-  JCP_MAX_COMPRESSION = 0x5D083AAD, /* best compression ratio (progressive, all mozjpeg extensions) */
-  JCP_FASTEST = 0x2AEA5CB4 /* libjpeg[-turbo] defaults (baseline, no mozjpeg extensions) */
+    JCP_MAX_COMPRESSION = 0x5D083AAD, /* best compression ratio (progressive, all mozjpeg extensions) */
+    JCP_FASTEST = 0x2AEA5CB4, /* libjpeg[-turbo] defaults (baseline, no mozjpeg extensions) */
 }
 
 #[repr(C)]
 /// Routines that are to be used by both halves of the library are declared
 /// to receive a pointer to this structure.  There are no actual instances of
-/// jpeg_common_struct, only of jpeg_compress_struct and jpeg_decompress_struct.
+/// `jpeg_common_struct`, only of `jpeg_compress_struct` and `jpeg_decompress_struct`.
 pub struct jpeg_common_struct {
     pub err: *mut jpeg_error_mgr,
     pub mem: *mut jpeg_memory_mgr,
@@ -317,7 +316,7 @@ enum jpeg_entropy_encoder {}
 
 #[repr(C)]
 pub struct jpeg_compress_struct {
-    pub common : jpeg_common_struct,
+    pub common: jpeg_common_struct,
     pub dest: *mut jpeg_destination_mgr,
     /// Description of source image --- these fields must be filled in by
     /// outer application before starting compression.
@@ -348,8 +347,6 @@ pub struct jpeg_compress_struct {
     /// scaled JPEG image height
     #[cfg(feature = "jpeg70_abi")]
     jpeg_height: JDIMENSION,
-
-
 
     /// bits of precision in image data
     pub data_precision: c_int,
@@ -457,13 +454,13 @@ pub struct jpeg_decompress_struct {
     pub common: jpeg_common_struct,
 
     pub src: *mut jpeg_source_mgr,
-    /// Basic description of image --- filled in by jpeg_read_header()
+    /// Basic description of image --- filled in by `jpeg_read_header()`
     pub image_width: JDIMENSION,
     pub image_height: JDIMENSION,
     pub num_components: c_int,
     pub jpeg_color_space: J_COLOR_SPACE,
     /// Decompression processing parameters --- these fields must be set before
-    /// calling jpeg_start_decompress().  Note that jpeg_read_header() initializes
+    /// calling `jpeg_start_decompress()`.  Note that `jpeg_read_header()` initializes
     /// them to default values.
     pub out_color_space: J_COLOR_SPACE,
     pub scale_num: c_uint,
@@ -491,25 +488,25 @@ pub struct jpeg_decompress_struct {
     // #[deprecated]
     pub enable_2pass_quant: boolean,
     /// Description of actual output image that will be returned to application.
-    /// These fields are computed by jpeg_start_decompress().
-    /// You can also use jpeg_calc_output_dimensions() to determine these values
-    /// in advance of calling jpeg_start_decompress().
+    /// These fields are computed by `jpeg_start_decompress()`.
+    /// You can also use `jpeg_calc_output_dimensions()` to determine these values
+    /// in advance of calling `jpeg_start_decompress()`.
     pub output_width: JDIMENSION,
     pub output_height: JDIMENSION,
     pub out_color_components: c_int,
     pub output_components: c_int,
     /// min recommended height of scanline buffer
-    /// If the buffer passed to jpeg_read_scanlines() is less than this many rows
+    /// If the buffer passed to `jpeg_read_scanlines()` is less than this many rows
     /// high, space and time will be wasted due to unnecessary data copying.
-    /// Usually rec_outbuf_height will be 1 or 2, at most 4.
+    /// Usually `rec_outbuf_height` will be 1 or 2, at most 4.
     pub rec_outbuf_height: c_int,
     // #[deprecated]
     pub actual_number_of_colors: c_int,
     // #[deprecated]
     pub colormap: JSAMPARRAY_MUT,
-    /// Row index of next scanline to be read from jpeg_read_scanlines().
+    /// Row index of next scanline to be read from `jpeg_read_scanlines()`.
     /// Application may use this to control its processing loop, e.g.,
-    /// "while (output_scanline < output_height)".
+    /// "while (`output_scanline` < `output_height`)".
     pub output_scanline: JDIMENSION,
     /// Current input scan number and number of iMCU rows completed in scan.
     /// These indicate the progress of the decompressor input side.
@@ -517,7 +514,7 @@ pub struct jpeg_decompress_struct {
     pub input_iMCU_row: JDIMENSION,
     pub output_scan_number: c_int,
     pub output_iMCU_row: JDIMENSION,
-    /// Current progression status.  coef_bits[c][i] indicates the precision
+    /// Current progression status.  `coef_bits[c][i]` indicates the precision
     /// with which component c's DCT coefficient i (in zigzag order) is known.
     /// It is -1 when no data has yet been received, otherwise it is the point
     /// transform (shift) value for the most recent scan of the coefficient
@@ -563,7 +560,7 @@ pub struct jpeg_decompress_struct {
     /// smallest DCT_v_scaled_size of any component
     #[cfg(feature = "jpeg70_abi")]
     min_DCT_v_scaled_size: c_int,
-    /// smallest DCT_scaled_size of any component
+    /// smallest `DCT_scaled_size` of any component
     #[cfg(not(feature = "jpeg70_abi"))]
     min_DCT_scaled_size: c_int,
     total_iMCU_rows: JDIMENSION,
@@ -856,7 +853,7 @@ pub fn simd_is_detectable() {
 }
 
 #[test]
-#[cfg(all(target_arch="x86_64", feature="nasm_simd"))]
+#[cfg(all(target_arch = "x86_64", feature = "nasm_simd"))]
 pub fn simd_works_sse2() {
     #[repr(align(16))]
     struct Aligned([DCTELEM; 64]);

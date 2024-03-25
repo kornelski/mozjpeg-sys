@@ -1,7 +1,7 @@
 use crate::MarkerData::Scan;
-use std::ffi::CString;
 use cloudflare_soos::jpeg::*;
 use mozjpeg_sys::*;
+use std::ffi::CString;
 use std::mem;
 
 fn decode_rgb_data(data: &[u8]) -> (Vec<u8>, u32, u32) {
@@ -109,7 +109,6 @@ fn no_green_faces() {
     assert_eq!(3, f.dc_table_indices.len());
 }
 
-
 #[test]
 fn roundtrip() {
     let decoded = decode_rgb_data(&std::fs::read("tests/test.jpg").unwrap());
@@ -155,8 +154,7 @@ fn encode_subsampled_jpeg((data, width, height): (Vec<u8>, u32, u32)) -> Vec<u8>
     }
 }
 
-
-/// Returns true if all lines in image_src (not necessarily all lines of the image) were written
+/// Returns true if all lines in `image_src` (not necessarily all lines of the image) were written
 pub fn write_scanlines(cinfo: &mut jpeg_compress_struct, image_src: &[u8]) -> bool {
     const MAX_MCU_HEIGHT: usize = 16;
 

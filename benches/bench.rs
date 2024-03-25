@@ -1,9 +1,9 @@
 #![feature(test)]
 extern crate test;
 
-use test::Bencher;
-use std::mem;
 use mozjpeg_sys::*;
+use std::mem;
+use test::Bencher;
 
 #[bench]
 pub fn decompress(bencher: &mut Bencher) {
@@ -13,7 +13,7 @@ pub fn decompress(bencher: &mut Bencher) {
     let jpeg = unsafe { encode(&img, w, h) };
     bencher.iter(|| {
         unsafe { decode(&jpeg)  }
-    })
+    });
 }
 
 #[bench]
@@ -23,14 +23,14 @@ pub fn compress(bencher: &mut Bencher) {
     let img = random_pixels(w, h);
     bencher.iter(|| {
         unsafe { encode(&img, w, h) }
-    })
+    });
 }
 
 fn random_pixels(w: u32, h: u32) -> Vec<[u8; 3]> {
     (0..h).flat_map(move |h| {
         (0..w).map(move |w| {
-            let x = (w as f64)/13.;
-            let y = (h as f64)/17.;
+            let x = f64::from(w)/13.;
+            let y = f64::from(h)/17.;
             let r = ((x.sin() * y.cos() + 1.) * 140.) as u8;
             let g = ((x.cos() * y.sin() + 1.) * 128.) as u8;
             let b = ((x.sin() * y.sin() + 1.) * 100.) as u8;
