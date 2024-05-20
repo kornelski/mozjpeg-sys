@@ -17,6 +17,12 @@ pub const JCROP_CODE_JCROP_POS: JCROP_CODE = 1;
 pub const JCROP_CODE_JCROP_NEG: JCROP_CODE = 2;
 pub const JCROP_CODE_JCROP_FORCE: JCROP_CODE = 3;
 pub type JCROP_CODE = ::std::os::raw::c_uint;
+pub const JCOPY_OPTION_JCOPYOPT_NONE: JCOPY_OPTION = 0;
+pub const JCOPY_OPTION_JCOPYOPT_COMMENTS: JCOPY_OPTION = 1;
+pub const JCOPY_OPTION_JCOPYOPT_ALL: JCOPY_OPTION = 2;
+pub const JCOPY_OPTION_JCOPYOPT_ALL_EXCEPT_ICC: JCOPY_OPTION = 3;
+pub const JCOPY_OPTION_JCOPYOPT_ICC: JCOPY_OPTION = 4;
+pub type JCOPY_OPTION = ::std::os::raw::c_uint;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -73,5 +79,16 @@ extern "C-unwind" {
         srcinfo: j_decompress_ptr,
         info: *mut jpeg_transform_info,
     ) -> boolean;
+
+    pub fn jcopy_markers_setup(
+        srcinfo: j_decompress_ptr,
+        option: JCOPY_OPTION,
+    );
+
+    pub fn jcopy_markers_execute(
+        srcinfo: j_decompress_ptr,
+        dstinfo: j_compress_ptr,
+        option: JCOPY_OPTION,
+    );
 }
 
