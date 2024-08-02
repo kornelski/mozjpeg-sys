@@ -12,7 +12,7 @@ documentation = "https://github.com/mozilla/mozjpeg#readme"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "2.2.0"
+version = "2.2.1"
 edition = "2021"
 rust-version = "1.71"
 
@@ -20,7 +20,7 @@ rust-version = "1.71"
 dunce = "1.0.4"
 
 [build-dependencies.cc]
-version = "1.0.81"
+version = "1.1"
 
 [build-dependencies.nasm-rs]
 optional = true
@@ -31,7 +31,7 @@ name = "reencode"
 path = "examples/reencode.rs"
 
 [dependencies]
-libc = "0.2.126"
+libc = "0.2.150"
 
 [features]
 # If compiling for non-Intel platforms and `nasm` causes you grief, disable default features and use `with_simd` instead.
@@ -64,7 +64,7 @@ name = "mozjpeg_sys"
 crate-type = ["staticlib", "lib"]
 
 [dev-dependencies]
-cloudflare-soos = "2.2.0"
+cloudflare-soos = "2.3"
 arrayvec = "0.7.4"
 
 [package.metadata.docs.rs]
