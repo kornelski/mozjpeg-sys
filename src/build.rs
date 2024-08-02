@@ -138,7 +138,7 @@ fn main() {
     } else {
         if target_os == "ios" && env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
             // thread-local storage is not supported on iOS 9
-            env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
+            unsafe { env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0") };
         }
         // Try _Thread_local if __thread doesn't compile
         "#define THREAD_LOCAL __thread"
