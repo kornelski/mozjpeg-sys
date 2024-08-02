@@ -175,7 +175,7 @@ fn main() {
 
     let with_simd = cfg!(feature = "with_simd")
         && target_arch != "wasm32" // no WASM-SIMD support here
-        && (!nasm_needed_for_arch || nasm_supported());
+        && if nasm_needed_for_arch { nasm_supported() } else { gas_supported(&c) };
 
     #[cfg(feature = "with_simd")]
     {
@@ -267,6 +267,14 @@ fn main() {
     }
 
     c.compile(&format!("mozjpeg{abi}"));
+}
+
+fn gas_supported(c: &cc::Build) -> bool {
+    let supported = c.try_get_compiler().is_ok_and(|c| !c.is_like_msvc());
+    if !supported {
+        println!("cargo:warning=SIMD needs GNU Assembler, but MSVC is used");
+    }
+    supported
 }
 
 fn nasm_supported() -> bool {
