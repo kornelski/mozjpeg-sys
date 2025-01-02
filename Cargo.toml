@@ -12,7 +12,7 @@ documentation = "https://github.com/mozilla/mozjpeg#readme"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "2.2.2"
+version = "3.0.0"
 edition = "2021"
 rust-version = "1.71"
 
@@ -35,7 +35,7 @@ libc = "0.2.150"
 
 [features]
 # If compiling for non-Intel platforms and `nasm` causes you grief, disable default features and use `with_simd` instead.
-default = ["parallel", "unwinding", "nasm_simd"]
+default = ["parallel", "unwinding", "nasm_simd", "neon_intrinsics"]
 # May compile native dependencies quicker
 parallel = ["cc/parallel", "nasm-rs?/parallel"]
 # Use SIMD-optimized assembly on ARM and other non-Intel platforms.
@@ -60,6 +60,8 @@ jpeg70_abi = ["arith_dec", "arith_enc"]
 jpeg80_abi = ["jpeg70_abi"]
 # Obsolete. Just use `nasm_simd,parallel`
 nasm_simd_parallel_build = ["nasm_simd", "parallel"]
+# Disable if old C compilers are causing trouble
+neon_intrinsics = []
 
 [lib]
 name = "mozjpeg_sys"

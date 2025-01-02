@@ -5,7 +5,7 @@
 #![allow(non_upper_case_globals)]
 
 use std::mem;
-pub use std::os::raw::{c_int, c_long, c_uint, c_ulong, c_void};
+pub use std::os::raw::{c_char, c_int, c_long, c_uint, c_ulong, c_void};
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use libc::FILE;
@@ -44,17 +44,19 @@ pub const NUM_QUANT_TBLS: usize = 4;
 
 pub type boolean = c_int;
 pub type JSAMPLE = u8;
+pub type J12SAMPLE = u16;
 pub type JCOEF = i16;
 pub type JDIMENSION = c_uint;
 /// ptr to one image row of pixel samples.
 pub type JSAMPROW = *const JSAMPLE;
 pub type JSAMPROW_MUT = *mut JSAMPLE;
+pub type J12SAMPROW = *const J12SAMPLE;
+pub type J12SAMPROW_MUT = *mut J12SAMPLE;
 /// ptr to some rows (a 2-D sample array)
 pub type JSAMPARRAY = *const JSAMPROW;
 pub type JSAMPARRAY_MUT = *mut JSAMPROW_MUT;
-/// a 3-D sample array: top index is color
-pub type JSAMPIMAGE = *const JSAMPARRAY;
-pub type JSAMPIMAGE_MUT = *mut JSAMPARRAY_MUT;
+pub type J12SAMPARRAY = *const J12SAMPROW;
+pub type J12SAMPARRAY_MUT = *mut J12SAMPROW_MUT;
 /// one block of coefficients
 pub type JBLOCK = [JCOEF; 64usize];
 /// pointer to one row of coefficient blocks
@@ -613,9 +615,9 @@ pub struct jpeg_error_mgr {
     pub msg_parm: msg_parm_union,
     pub trace_level: c_int,
     pub num_warnings: c_long,
-    pub jpeg_message_table: *const *const i8,
+    pub jpeg_message_table: *const *const c_char,
     pub last_jpeg_message: c_int,
-    pub addon_message_table: *const *const i8,
+    pub addon_message_table: *const *const c_char,
     pub first_addon_message: c_int,
     pub last_addon_message: c_int,
 }
@@ -774,11 +776,11 @@ extern "C-unwind" {
     pub fn jpeg_alloc_quant_table(cinfo: &mut jpeg_common_struct) -> *mut JQUANT_TBL;
     pub fn jpeg_alloc_huff_table(cinfo: &mut jpeg_common_struct) -> *mut JHUFF_TBL;
     pub fn jpeg_start_compress(cinfo: &mut jpeg_compress_struct, write_all_tables: boolean);
-    pub fn jpeg_write_scanlines(cinfo: &mut jpeg_compress_struct, scanlines: JSAMPARRAY,
-                            num_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg_write_scanlines(cinfo: &mut jpeg_compress_struct, scanlines: JSAMPARRAY, num_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg12_write_scanlines(cinfo: &mut jpeg_compress_struct, scanlines: J12SAMPARRAY, num_lines: JDIMENSION) -> JDIMENSION;
     pub fn jpeg_finish_compress(cinfo: &mut jpeg_compress_struct);
-    pub fn jpeg_write_raw_data(cinfo: &mut jpeg_compress_struct, data: JSAMPIMAGE,
-                           num_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg_write_raw_data(cinfo: &mut jpeg_compress_struct, data: *const JSAMPARRAY, num_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg12_write_raw_data(cinfo: &mut jpeg_compress_struct, data: *mut J12SAMPARRAY, num_lines: JDIMENSION) -> JDIMENSION;
     pub fn jpeg_write_marker(cinfo: &mut jpeg_compress_struct, marker: c_int,
                          dataptr: *const u8, datalen: c_uint);
     pub fn jpeg_write_m_header(cinfo: &mut jpeg_compress_struct, marker: c_int, datalen: c_uint);
@@ -786,11 +788,12 @@ extern "C-unwind" {
     pub fn jpeg_write_tables(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_read_header(cinfo: &mut jpeg_decompress_struct, require_image: boolean) -> c_int;
     pub fn jpeg_start_decompress(cinfo: &mut jpeg_decompress_struct) -> boolean;
-    pub fn jpeg_read_scanlines(cinfo: &mut jpeg_decompress_struct, scanlines: JSAMPARRAY_MUT,
-                           max_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg_read_scanlines(cinfo: &mut jpeg_decompress_struct, scanlines: JSAMPARRAY_MUT, max_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg12_read_scanlines(cinfo: &mut jpeg_decompress_struct, scanlines: J12SAMPARRAY_MUT, max_lines: JDIMENSION) -> JDIMENSION;
     pub fn jpeg_finish_decompress(cinfo: &mut jpeg_decompress_struct) -> boolean;
-    pub fn jpeg_read_raw_data(cinfo: &mut jpeg_decompress_struct, data: JSAMPIMAGE_MUT,
-                          max_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg_read_raw_data(cinfo: &mut jpeg_decompress_struct, data: *mut JSAMPARRAY_MUT, max_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg12_read_raw_data(cinfo: &mut jpeg_decompress_struct, data: *mut J12SAMPARRAY_MUT, max_lines: JDIMENSION) -> JDIMENSION;
+
     /// The ICC has defined a standard for including such data in JPEG "APP2" markers.
     /// The aforementioned functions do not know anything about the internal structure
     /// of the ICC profile data; they just know how to embed the profile data into a
@@ -816,6 +819,7 @@ extern "C-unwind" {
     /// jpeg_skip_scanlines() with a suspending data source will result in undefined
     /// behavior.
     pub fn jpeg_skip_scanlines(cinfo: &mut jpeg_decompress_struct, num_lines: JDIMENSION) -> JDIMENSION;
+    pub fn jpeg12_skip_scanlines(cinfo: &mut jpeg_decompress_struct, num_lines: JDIMENSION) -> JDIMENSION;
     /// This function provides application programmers with the ability to decompress
     /// only a portion of each row in the JPEG image.  It must be called after
     /// jpeg_start_decompress() and before any calls to jpeg_read_scanlines() or
@@ -825,12 +829,11 @@ extern "C-unwind" {
     /// boundary.  If it doesn't, then it will be moved left to the nearest iMCU
     /// boundary, and width will be increased accordingly.
     pub fn jpeg_crop_scanline(cinfo: &mut jpeg_decompress_struct, xoffset: &mut JDIMENSION, width: &mut JDIMENSION);
+    pub fn jpeg12_crop_scanline(cinfo: &mut jpeg_decompress_struct, xoffset: &mut JDIMENSION, width: &mut JDIMENSION);
     pub fn jpeg_has_multiple_scans(cinfo: &jpeg_decompress_struct) -> boolean;
     pub fn jpeg_start_output(cinfo: &mut jpeg_decompress_struct, scan_number: c_int) -> boolean;
     pub fn jpeg_finish_output(cinfo: &mut jpeg_decompress_struct) -> boolean;
     pub fn jpeg_input_complete(cinfo: &jpeg_decompress_struct) -> boolean;
-    #[deprecated]
-    pub fn jpeg_new_colormap(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_consume_input(cinfo: &mut jpeg_decompress_struct) -> c_int;
     /// Precalculate JPEG dimensions for current compression parameters
     #[cfg(feature = "jpeg70_abi")]
@@ -1630,6 +1633,8 @@ fn all_links() {
         jpeg_write_m_byte as *const c_void,
         jpeg_write_tables as *const c_void,
         jpeg_read_header as *const c_void,
+        jpeg12_write_scanlines as *const c_void,
+        jpeg12_write_raw_data as *const c_void,
         jpeg_start_decompress as *const c_void,
         jpeg_read_scanlines as *const c_void,
         jpeg_finish_decompress as *const c_void,
@@ -1641,9 +1646,13 @@ fn all_links() {
             jpeg_write_icc_profile as *const c_void
         },
         jpeg_skip_scanlines as *const c_void,
+        jpeg12_read_scanlines as *const c_void,
         jpeg_crop_scanline as *const c_void,
         jpeg_has_multiple_scans as *const c_void,
         jpeg_start_output as *const c_void,
+        jpeg12_skip_scanlines as *const c_void,
+        jpeg12_crop_scanline as *const c_void,
+        jpeg12_read_raw_data as *const c_void,
         jpeg_finish_output as *const c_void,
         jpeg_input_complete as *const c_void,
         jpeg_consume_input as *const c_void,
