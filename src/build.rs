@@ -97,7 +97,7 @@ fn main() {
     writeln!(jconfigint_h, r#"
         #define BUILD "{timestamp}-mozjpeg-sys"
         #ifndef INLINE
-            #if defined(__GNUC__)
+            #if defined(__clang__) || defined(__GNUC__)
                 #define INLINE inline __attribute__((always_inline))
             #elif defined(_MSC_VER)
                 #define INLINE __forceinline
@@ -105,10 +105,37 @@ fn main() {
                 #define INLINE inline
             #endif
         #endif
+        #ifndef HIDDEN
+            #if defined(__clang__) || defined(__GNUC__)
+                #define HIDDEN  __attribute__((visibility("hidden")))
+            #endif
+        #endif
+        #ifndef THREAD_LOCAL
+            #if defined (_MSC_VER)
+                #define HAVE_THREAD_LOCAL
+                #define THREAD_LOCAL  __declspec(thread)
+            #elif defined(__clang__) || defined(__GNUC__)
+                #define HAVE_THREAD_LOCAL
+                #define THREAD_LOCAL  __thread
+            #else
+                #define THREAD_LOCAL
+            #endif
+        #endif
+        #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
+        #ifndef HAVE_BUILTIN_CTZL
+            #if defined (_MSC_VER)
+                #if (SIZEOF_SIZE_T == 8)
+                    #define HAVE_BITSCANFORWARD64
+                #elif (SIZEOF_SIZE_T == 4)
+                    #define HAVE_BITSCANFORWARD
+                #endif
+            #elif defined(__clang__) || defined(__GNUC__)
+                #define HAVE_BUILTIN_CTZL 1
+            #endif
+        #endif
         #define FALLTHROUGH
         #define PACKAGE_NAME "{PACKAGE_NAME}"
         #define VERSION "{VERSION}"
-        #define SIZEOF_SIZE_T {SIZEOF_SIZE_T}
         "#,
         timestamp = timestamp,
         PACKAGE_NAME = env::var("CARGO_PKG_NAME").expect("pkg"),
@@ -132,18 +159,11 @@ fn main() {
         "#
     ).expect("write");
 
-    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    let thread_local_define = if target_os == "windows" {
-        "#define THREAD_LOCAL __declspec(thread)"
-    } else {
-        if target_os == "ios" && env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
-            // thread-local storage is not supported on iOS 9
-            unsafe { env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "12.0") };
-        }
-        // Try _Thread_local if __thread doesn't compile
-        "#define THREAD_LOCAL __thread"
-    };
-    writeln!(jconfig_h, "{thread_local_define}").unwrap();
+    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    if target_os == "ios" && env::var_os("IPHONEOS_DEPLOYMENT_TARGET").is_none() {
+        // thread-local storage is not supported on iOS 9
+        unsafe { env::set_var("IPHONEOS_DEPLOYMENT_TARGET", "14.0") };
+    }
 
     if cfg!(feature = "arith_enc") {
         jconfig_h.write_all(b"#define C_ARITH_CODING_SUPPORTED 1\n").expect("write");
@@ -249,7 +269,6 @@ fn main() {
                 if nasm_needed_for_arch {
                     #[cfg(feature = "nasm_simd")]
                     {
-                        let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
                         for obj in build_nasm(&root, &vendor, &out_dir, &target_arch, &target_os) {
                             c.object(obj);
                         }
