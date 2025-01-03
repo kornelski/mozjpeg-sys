@@ -3,7 +3,6 @@ use std::fs;
 use std::io::Write;
 #[allow(unused_imports)]
 use std::path::{Path, PathBuf};
-use std::process;
 use std::str::FromStr;
 
 fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
@@ -298,7 +297,7 @@ fn gas_supported(c: &cc::Build) -> bool {
 
 fn nasm_supported() -> bool {
     if cfg!(feature = "nasm_simd") {
-        match process::Command::new("nasm").arg("-v").output() {
+        match std::process::Command::new("nasm").arg("-v").output() {
             Err(e) => {
                 println!("cargo:warning=NASM not installed. Mozjpeg's SIMD won't be enabled: {e}");
                 false

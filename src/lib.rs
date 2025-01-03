@@ -768,11 +768,6 @@ extern "C-unwind" {
                             basic_table: *const c_uint,
                             scale_factor: c_int,
                             force_baseline: boolean);
-    pub fn jpeg_float_add_quant_table(cinfo: &mut jpeg_compress_struct,
-                                  which_tbl: c_int,
-                                  basic_table: *const c_uint,
-                                  scale_factor: f32,
-                                  force_baseline: boolean);
     pub fn jpeg_quality_scaling(quality: c_int) -> c_int;
     pub fn jpeg_float_quality_scaling(quality: f32) -> f32;
     pub fn jpeg_simple_progression(cinfo: &mut jpeg_compress_struct);
@@ -835,7 +830,7 @@ extern "C-unwind" {
     pub fn jpeg_c_set_int_param(cinfo: &mut jpeg_compress_struct, param: J_INT_PARAM, value: c_int);
     pub fn jpeg_c_get_int_param(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> c_int;
     pub fn jpeg_set_idct_method_selector(cinfo: &jpeg_compress_struct, param: *const c_void);
-    #[cfg(test)] fn jsimd_can_rgb_ycc() -> c_int;
+    #[cfg(test)] #[allow(dead_code)] fn jsimd_can_rgb_ycc() -> c_int;
     #[cfg(test)] #[allow(dead_code)] fn jsimd_can_fdct_ifast() -> c_int;
     #[cfg(test)] #[allow(dead_code)] fn jsimd_fdct_ifast(block: *mut DCTELEM);
 }
@@ -846,6 +841,7 @@ pub fn enum_32bit() {
 }
 
 #[test]
+#[cfg(feature = "with_simd")]
 pub fn simd_is_detectable() {
     unsafe {
         jsimd_can_rgb_ycc();
@@ -1562,4 +1558,71 @@ fn bindgen_test_layout_jpeg_memory_mgr() {
         48usize,
         concat!("Offset of field: ", stringify!(jpeg_memory_mgr), "::", stringify!(max_alloc_chunk))
     );
+}
+
+#[test]
+fn all_links() {
+    let _x = [
+        jpeg_std_error as *const c_void,
+        jpeg_CreateCompress as *const c_void,
+        jpeg_CreateDecompress as *const c_void,
+        jpeg_destroy_compress as *const c_void,
+        jpeg_destroy_decompress as *const c_void,
+        jpeg_stdio_dest as *const c_void,
+        jpeg_stdio_src as *const c_void,
+        jpeg_mem_dest as *const c_void,
+        jpeg_mem_src as *const c_void,
+        jpeg_set_defaults as *const c_void,
+        jpeg_set_colorspace as *const c_void,
+        jpeg_default_colorspace as *const c_void,
+        jpeg_set_quality as *const c_void,
+        jpeg_set_linear_quality as *const c_void,
+        jpeg_add_quant_table as *const c_void,
+        jpeg_quality_scaling as *const c_void,
+        jpeg_float_quality_scaling as *const c_void,
+        jpeg_simple_progression as *const c_void,
+        jpeg_suppress_tables as *const c_void,
+        jpeg_alloc_quant_table as *const c_void,
+        jpeg_alloc_huff_table as *const c_void,
+        jpeg_start_compress as *const c_void,
+        jpeg_write_scanlines as *const c_void,
+        jpeg_finish_compress as *const c_void,
+        jpeg_write_raw_data as *const c_void,
+        jpeg_write_marker as *const c_void,
+        jpeg_write_m_header as *const c_void,
+        jpeg_write_m_byte as *const c_void,
+        jpeg_write_tables as *const c_void,
+        jpeg_read_header as *const c_void,
+        jpeg_start_decompress as *const c_void,
+        jpeg_read_scanlines as *const c_void,
+        jpeg_finish_decompress as *const c_void,
+        jpeg_read_raw_data as *const c_void,
+        jpeg_has_multiple_scans as *const c_void,
+        jpeg_start_output as *const c_void,
+        jpeg_finish_output as *const c_void,
+        jpeg_input_complete as *const c_void,
+        jpeg_consume_input as *const c_void,
+        #[cfg(feature = "jpeg70_abi")] {
+            jpeg_calc_jpeg_dimensions as *const c_void
+        },
+        jpeg_calc_output_dimensions as *const c_void,
+        jpeg_save_markers as *const c_void,
+        jpeg_set_marker_processor as *const c_void,
+        jpeg_read_coefficients as *const c_void,
+        jpeg_write_coefficients as *const c_void,
+        jpeg_copy_critical_parameters as *const c_void,
+        jpeg_abort_compress as *const c_void,
+        jpeg_abort_decompress as *const c_void,
+        jpeg_resync_to_restart as *const c_void,
+        jpeg_c_bool_param_supported as *const c_void,
+        jpeg_c_set_bool_param as *const c_void,
+        jpeg_c_get_bool_param as *const c_void,
+        jpeg_c_float_param_supported as *const c_void,
+        jpeg_c_set_float_param as *const c_void,
+        jpeg_c_get_float_param as *const c_void,
+        jpeg_c_int_param_supported as *const c_void,
+        jpeg_c_set_int_param as *const c_void,
+        jpeg_c_get_int_param as *const c_void,
+        jpeg_set_idct_method_selector as *const c_void,
+    ];
 }
