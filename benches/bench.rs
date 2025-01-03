@@ -45,7 +45,6 @@ unsafe fn decode(data: &[u8]) -> (Vec<[u8; 3]>, u32, u32) {
     cinfo.common.err = jpeg_std_error(&mut err);
     jpeg_create_decompress(&mut cinfo);
 
-
     jpeg_mem_src(&mut cinfo, data.as_ptr(), data.len() as _);
     jpeg_read_header(&mut cinfo, true as boolean);
 

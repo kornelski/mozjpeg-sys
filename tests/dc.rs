@@ -174,11 +174,7 @@ pub fn write_scanlines(cinfo: &mut jpeg_compress_struct, image_src: &[u8]) -> bo
         let mut row_pointers = row_pointers.as_ptr();
         while rows_left > 0 {
             unsafe {
-                let rows_written = jpeg_write_scanlines(
-                    cinfo,
-                    row_pointers,
-                    rows_left,
-                );
+                let rows_written = jpeg_write_scanlines(cinfo, row_pointers, rows_left);
                 debug_assert!(rows_left >= rows_written);
                 if rows_written == 0 {
                     return false;
