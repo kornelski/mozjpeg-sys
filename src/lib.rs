@@ -801,11 +801,13 @@ extern "C-unwind" {
     /// Callers wishing to use jpeg_read_icc_profile() must call jpeg_save_markers(cinfo, JPEG_APP0 + 2, 0xFFFF);
     /// prior to calling jpeg_read_header(). jpeg_read_icc_profile() can be called at
     /// any point between jpeg_read_header() and jpeg_finish_decompress().
+    #[cfg(feature = "icc_io")]
     pub fn jpeg_read_icc_profile(cinfo: &mut jpeg_decompress_struct, icc_data_ptr: *mut *mut u8, icc_data_len: *mut c_uint) -> boolean;
     /// jpeg_write_icc_profile() must be called after calling jpeg_start_compress() and
     /// before the first call to jpeg_write_scanlines() or jpeg_write_raw_data().  This
     /// ordering ensures that the APP2 marker(s) will appear after the SOI and JFIF or
     /// Adobe markers, but before all other data.
+    #[cfg(feature = "icc_io")]
     pub fn jpeg_write_icc_profile(cinfo: &mut jpeg_compress_struct, icc_data_ptr: *const u8, icc_data_len: c_uint);
     /// This function provides application programmers with the ability to skip over
     /// multiple rows in the JPEG image.
@@ -1632,6 +1634,14 @@ fn all_links() {
         jpeg_read_scanlines as *const c_void,
         jpeg_finish_decompress as *const c_void,
         jpeg_read_raw_data as *const c_void,
+        #[cfg(feature = "icc_io")] {
+            jpeg_read_icc_profile as *const c_void
+        },
+        #[cfg(feature = "icc_io")] {
+            jpeg_write_icc_profile as *const c_void
+        },
+        jpeg_skip_scanlines as *const c_void,
+        jpeg_crop_scanline as *const c_void,
         jpeg_has_multiple_scans as *const c_void,
         jpeg_start_output as *const c_void,
         jpeg_finish_output as *const c_void,
@@ -1653,6 +1663,8 @@ fn all_links() {
         jpeg_c_set_bool_param as *const c_void,
         jpeg_c_get_bool_param as *const c_void,
         jpeg_c_float_param_supported as *const c_void,
+        jpeg_abort as *const c_void,
+        jpeg_destroy as *const c_void,
         jpeg_c_set_float_param as *const c_void,
         jpeg_c_get_float_param as *const c_void,
         jpeg_c_int_param_supported as *const c_void,

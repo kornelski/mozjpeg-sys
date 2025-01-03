@@ -68,6 +68,11 @@ fn main() {
         c.file(file);
     }
 
+    if cfg!(feature = "icc_io") {
+        c.file("vendor/jcicc.c");
+        c.file("vendor/jdicc.c");
+    }
+
     let abi = if cfg!(feature = "jpeg80_abi") {
         "80"
     } else if cfg!(feature = "jpeg70_abi") {

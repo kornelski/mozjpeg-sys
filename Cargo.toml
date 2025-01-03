@@ -48,6 +48,8 @@ unwinding = []
 arith_dec = []
 # Enable creation of JPEGs using arithmetic coding (problematic compatibility)
 arith_enc = []
+# Helper functions for extracting/embedding ICC profiles
+icc_io = []
 # Enable alternative simpler C API
 turbojpeg_api = ["jpegtran"]
 # Include code for `jpegtran`
