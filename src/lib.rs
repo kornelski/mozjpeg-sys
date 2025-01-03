@@ -650,8 +650,7 @@ pub struct jpeg_destination_mgr {
     pub next_output_byte: *mut u8,
     pub free_in_buffer: usize,
     pub init_destination: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_compress_struct)>,
-    pub empty_output_buffer: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_compress_struct)
-                                                       -> boolean>,
+    pub empty_output_buffer: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_compress_struct) -> boolean>,
     pub term_destination: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_compress_struct)>,
 }
 
@@ -792,6 +791,38 @@ extern "C-unwind" {
     pub fn jpeg_finish_decompress(cinfo: &mut jpeg_decompress_struct) -> boolean;
     pub fn jpeg_read_raw_data(cinfo: &mut jpeg_decompress_struct, data: JSAMPIMAGE_MUT,
                           max_lines: JDIMENSION) -> JDIMENSION;
+    /// The ICC has defined a standard for including such data in JPEG "APP2" markers.
+    /// The aforementioned functions do not know anything about the internal structure
+    /// of the ICC profile data; they just know how to embed the profile data into a
+    /// JPEG file while writing it, or to extract the profile data from a JPEG file
+    /// while reading it.
+    /// This memory region is allocated by the library using malloc() and must be freed
+    /// by the caller using free() when the memory region is no longer needed.
+    /// Callers wishing to use jpeg_read_icc_profile() must call jpeg_save_markers(cinfo, JPEG_APP0 + 2, 0xFFFF);
+    /// prior to calling jpeg_read_header(). jpeg_read_icc_profile() can be called at
+    /// any point between jpeg_read_header() and jpeg_finish_decompress().
+    pub fn jpeg_read_icc_profile(cinfo: &mut jpeg_decompress_struct, icc_data_ptr: *mut *mut u8, icc_data_len: *mut c_uint) -> boolean;
+    /// jpeg_write_icc_profile() must be called after calling jpeg_start_compress() and
+    /// before the first call to jpeg_write_scanlines() or jpeg_write_raw_data().  This
+    /// ordering ensures that the APP2 marker(s) will appear after the SOI and JFIF or
+    /// Adobe markers, but before all other data.
+    pub fn jpeg_write_icc_profile(cinfo: &mut jpeg_compress_struct, icc_data_ptr: *const u8, icc_data_len: c_uint);
+    /// This function provides application programmers with the ability to skip over
+    /// multiple rows in the JPEG image.
+    ///
+    /// Suspending data sources are not supported by this function.  Calling
+    /// jpeg_skip_scanlines() with a suspending data source will result in undefined
+    /// behavior.
+    pub fn jpeg_skip_scanlines(cinfo: &mut jpeg_decompress_struct, num_lines: JDIMENSION) -> JDIMENSION;
+    /// This function provides application programmers with the ability to decompress
+    /// only a portion of each row in the JPEG image.  It must be called after
+    /// jpeg_start_decompress() and before any calls to jpeg_read_scanlines() or
+    /// jpeg_skip_scanlines().
+    /// If the output image is scaled, then xoffset and width are relative to the scaled image dimensions.
+    /// xoffset and width are passed by reference because xoffset must fall on an iMCU
+    /// boundary.  If it doesn't, then it will be moved left to the nearest iMCU
+    /// boundary, and width will be increased accordingly.
+    pub fn jpeg_crop_scanline(cinfo: &mut jpeg_decompress_struct, xoffset: &mut JDIMENSION, width: &mut JDIMENSION);
     pub fn jpeg_has_multiple_scans(cinfo: &jpeg_decompress_struct) -> boolean;
     pub fn jpeg_start_output(cinfo: &mut jpeg_decompress_struct, scan_number: c_int) -> boolean;
     pub fn jpeg_finish_output(cinfo: &mut jpeg_decompress_struct) -> boolean;
@@ -814,6 +845,8 @@ extern "C-unwind" {
                                coef_arrays: *mut *mut jvirt_barray_control);
     pub fn jpeg_copy_critical_parameters(srcinfo: &jpeg_decompress_struct,
                                      dstinfo: &mut jpeg_compress_struct);
+    #[cfg(feature = "jpeg80_abi")]
+    pub fn jpeg_core_output_dimensions(cinfo: &jpeg_decompress_struct);
     pub fn jpeg_abort_compress(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_abort_decompress(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_resync_to_restart(cinfo: &mut jpeg_decompress_struct, desired: c_int) -> boolean;
@@ -824,6 +857,8 @@ extern "C-unwind" {
     pub fn jpeg_c_get_bool_param(cinfo: &jpeg_compress_struct,
                              param: J_BOOLEAN_PARAM) -> boolean;
     pub fn jpeg_c_float_param_supported(cinfo: &jpeg_compress_struct, param: J_FLOAT_PARAM) -> boolean;
+    pub fn jpeg_abort(cinfo: &mut jpeg_common_struct);
+    pub fn jpeg_destroy(cinfo: &mut jpeg_common_struct);
     pub fn jpeg_c_set_float_param(cinfo: &mut jpeg_compress_struct, param: J_FLOAT_PARAM, value: f32);
     pub fn jpeg_c_get_float_param(cinfo: &jpeg_compress_struct, param: J_FLOAT_PARAM) -> f32;
     pub fn jpeg_c_int_param_supported(cinfo: &jpeg_compress_struct, param: J_INT_PARAM) -> boolean;
@@ -836,13 +871,13 @@ extern "C-unwind" {
 }
 
 #[test]
-pub fn enum_32bit() {
+fn enum_32bit() {
     assert_eq!(JBOOLEAN_TRELLIS_QUANT as u64, 0xC5122033);
 }
 
 #[test]
 #[cfg(feature = "with_simd")]
-pub fn simd_is_detectable() {
+fn simd_is_detectable() {
     unsafe {
         jsimd_can_rgb_ycc();
     }
@@ -850,7 +885,7 @@ pub fn simd_is_detectable() {
 
 #[test]
 #[cfg(all(target_arch = "x86_64", feature = "nasm_simd"))]
-pub fn simd_works_sse2() {
+fn simd_works_sse2() {
     #[repr(align(16))]
     struct Aligned([DCTELEM; 64]);
 
@@ -862,7 +897,7 @@ pub fn simd_works_sse2() {
 }
 
 #[test]
-pub fn try_decompress() {
+fn try_decompress() {
     unsafe {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
@@ -874,7 +909,7 @@ pub fn try_decompress() {
 }
 
 #[test]
-pub fn try_compress() {
+fn try_compress() {
     unsafe {
         let mut err = mem::zeroed();
         jpeg_std_error(&mut err);
