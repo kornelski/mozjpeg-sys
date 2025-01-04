@@ -848,7 +848,7 @@ extern "C-unwind" {
     pub fn jpeg_copy_critical_parameters(srcinfo: &jpeg_decompress_struct,
                                      dstinfo: &mut jpeg_compress_struct);
     #[cfg(feature = "jpeg80_abi")]
-    pub fn jpeg_core_output_dimensions(cinfo: &jpeg_decompress_struct);
+    pub fn jpeg_core_output_dimensions(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_abort_compress(cinfo: &mut jpeg_compress_struct);
     pub fn jpeg_abort_decompress(cinfo: &mut jpeg_decompress_struct);
     pub fn jpeg_resync_to_restart(cinfo: &mut jpeg_decompress_struct, desired: c_int) -> boolean;
