@@ -207,7 +207,9 @@ fn main() {
         if with_simd {
             let simd_dir = vendor.join("simd");
             c.include(&simd_dir);
-            c.define("NO_PROC_FOPEN", Some("1")); // open /proc/cpuinfo breaks my seccomp
+            if env::var_os("MOZJPEG_ALLOW_PROC_FOPEN").is_none_or(|v| v == "0") {
+                c.define("NO_PROC_FOPEN", Some("1")); // open /proc/cpuinfo breaks my seccomp
+            }
 
             jconfig_h.write_all(b"#define WITH_SIMD 1\n").unwrap();
 
