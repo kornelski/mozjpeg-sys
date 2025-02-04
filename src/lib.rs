@@ -607,6 +607,7 @@ pub struct jpeg_error_mgr {
     pub error_exit: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_common_struct)>,
     pub emit_message: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_common_struct, msg_level: c_int)>,
     pub output_message: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_common_struct)>,
+    /// WARNING: incorrect definition. It should have been `buffer: &mut [u8; 80usize]`
     pub format_message: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_common_struct, buffer: &[u8; 80usize])>,
     pub reset_error_mgr: Option<unsafe extern "C-unwind" fn(cinfo: &mut jpeg_common_struct)>,
     pub msg_code: c_int,
