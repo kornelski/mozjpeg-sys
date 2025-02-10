@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
+fn compiler(config_dir: &Path, vendor: &Path, target_arch: &str, target_feature: &str) -> (cc::Build, &'static str) {
     let mut c = cc::Build::new();
     c.include(config_dir);
     c.include(vendor);
@@ -16,12 +16,34 @@ fn compiler(config_dir: &Path, vendor: &Path) -> cc::Build {
         c.flag_if_supported(&format!("-march={target_cpu}"));
     }
 
+    let is_msvc = c.try_get_compiler().is_ok_and(|c| c.is_like_msvc());
+
+    let mut has_target_feature = |name, msvc, gcc| -> bool {
+        if target_feature.split(',').any(|has| has == name) {
+            let flag = if is_msvc { msvc  } else { gcc };
+            if c.is_flag_supported(flag).unwrap_or(false) {
+                c.flag(flag);
+                return true;
+            }
+        }
+        false
+    };
+
+    let simd_abi = if cfg!(feature = "with_simd") && target_arch == "x86_64" {
+        if has_target_feature("avx2", "/arch:AVX2", "-mavx2") {
+            "avx2"
+        } else if has_target_feature("avx", "/arch:AVX", "-mavx") {
+            "avx"
+        } else { "" }
+    } else { "" };
+
     if cfg!(feature = "unwinding") {
         c.flag_if_supported("-fexceptions");
     }
 
-    c
+    (c, simd_abi)
 }
+
 
 fn main() {
     let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
@@ -29,6 +51,10 @@ fn main() {
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("outdir"));
     let config_dir = out_dir.join("include");
     let vendor = root.join("vendor");
+    let target_feature = env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or_default();
+    // cfg!(target_arch) doesn't work for cross-compiling.
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
+
     println!("cargo:rerun-if-changed={}", vendor.display());
 
     // cc crate needs emscripten target to use correct `ar`
@@ -44,7 +70,7 @@ fn main() {
     let _ = fs::create_dir_all(&config_dir);
 
     println!("cargo:include={}", env::join_paths([&config_dir, &vendor]).expect("inc").to_str().expect("inc"));
-    let mut c = compiler(&config_dir, &vendor);
+    let (mut c, simd_abi) = compiler(&config_dir, &vendor, &target_arch, &target_feature);
 
     let target_pointer_width = env::var("CARGO_CFG_TARGET_POINTER_WIDTH").expect("target");
 
@@ -192,9 +218,6 @@ fn main() {
         c.file("vendor/jdatasrc-tj.c");
     }
 
-    // cfg!(target_arch) doesn't work for cross-compiling.
-    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("arch");
-
     let nasm_needed_for_arch = target_arch == "x86_64" || target_arch == "x86";
 
     let with_simd = cfg!(feature = "with_simd")
@@ -247,11 +270,10 @@ fn main() {
 
             match target_arch.as_str() {
                 "x86_64" => {
-                    c.flag_if_supported("-msse");
                     c.file("vendor/simd/x86_64/jsimd.c");
                 },
                 "x86" => {
-                    c.flag_if_supported("-msse");
+                    c.flag_if_supported("-msse2");
                     c.file("vendor/simd/i386/jsimd.c");
                 },
                 "mips" => {c.file("vendor/simd/mips/jsimd.c");},
@@ -280,7 +302,7 @@ fn main() {
                         }
                     }
                 } else {
-                    build_gas(compiler(&config_dir, &vendor), &target_arch, abi);
+                    build_gas(compiler(&config_dir, &vendor, &target_arch, &target_feature).0, &target_arch, abi);
                 };
             }
         }
@@ -291,7 +313,7 @@ fn main() {
         c.file("vendor/jsimd_none.c");
     }
 
-    c.compile(&format!("mozjpeg{abi}"));
+    c.compile(&format!("mozjpeg{abi}{simd_abi}"));
 }
 
 fn gas_supported(c: &cc::Build) -> bool {

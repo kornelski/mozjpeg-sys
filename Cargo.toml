@@ -12,7 +12,7 @@ documentation = "https://github.com/mozilla/mozjpeg#readme"
 license = "IJG AND Zlib AND BSD-3-Clause"
 build = "src/build.rs"
 links = "jpeg"
-version = "2.2.3"
+version = "2.2.4-beta.1"
 edition = "2021"
 rust-version = "1.71"
 
